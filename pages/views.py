@@ -25,10 +25,19 @@ def signup(request):
     return render(request, 'pages/signup.html')
 
 def account_reader(request):
-    return render(request, 'pages/account_reader.html')
+    books = [
+        {"id": 1, "title": "หนังสือ A"},
+        {"id": 2, "title": "หนังสือ B"},
+    ]
+    return render(request, "pages/account_reader.html", {"books": books})
 
 def account_publisher(request):
-    return render(request, 'pages/account_publisher.html')
+    books = [
+        {"id": 1, "title": "หนังสือ A"},
+        {"id": 2, "title": "หนังสือ B"},
+        {"id": 3, "title": "หนังสือ C"},
+    ]
+    return render(request, "pages/account_publisher.html", {"books": books})
 
 def edit_book(request):
     return render(request, 'pages/edit_book.html')
