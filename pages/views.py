@@ -4,7 +4,14 @@ def main(request):
     return render(request, 'pages/main.html')
 
 def home(request):
-    return render(request, 'pages/home.html')
+    books = [
+        {"id": 1, "title": "หนังสือ A", "image_url": "https://via.placeholder.com/150"},
+        {"id": 2, "title": "หนังสือ B", "image_url": "https://via.placeholder.com/150"},
+        {"id": 3, "title": "หนังสือ C", "image_url": "https://via.placeholder.com/150"},
+        {"id": 4, "title": "หนังสือ D", "image_url": "https://via.placeholder.com/150"},
+    ]   
+    return render(request, "pages/home.html", {"books": books})
+
 
 def book(request, book_id):
     # สำหรับตอนนี้ส่งข้อมูลแบบ static
