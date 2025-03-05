@@ -76,10 +76,14 @@ WSGI_APPLICATION = 'book_borrow.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': 'BookHub_DB',
+        'CLIENT': {
+            'host': 'mongodb+srv://OakJkpG:WnbnpRFVlsvZ8xZG@cluster0.4q7uo.mongodb.net/',
+        }
     }
 }
+
 
 
 # Password validation

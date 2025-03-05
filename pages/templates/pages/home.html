@@ -7,8 +7,9 @@
 <div class="home-container container-fluid">
     <div class="row">
         <a href="{% url 'main' %}" class="btn">Main</a>
-        <a href="{% url 'account_reader' %}" class="btn">account reader</a>
-        <a href="{% url 'account_publisher' %}" class="btn">account publisher</a>
+        <a href="{% url 'account_reader' %}" class="btn">Account Reader</a>
+        <a href="{% url 'account_publisher' %}" class="btn">Account Publisher</a>
+        
         <!-- Sidebar หมวดหมู่หนังสือ -->
         <div class="col-md-3">
             <ul class="list-group">
@@ -21,7 +22,7 @@
                 <li class="list-group-item">Cartoon Book</li>
             </ul>
         </div>
-        
+
         <!-- Content ด้านขวา -->
         <div class="col-md-9">
             <div class="d-flex justify-content-between mb-3">
@@ -34,15 +35,17 @@
 
             <div class="row">
                 {% for book in books %}
-                <div class="col-md-4">
-                    <div class="card">
-                        <img src="{{ book.image_url }}" class="card-img-top" alt="{{ book.title }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ book.title }}</h5>
-                            <a href="{% url 'book' book_id=book.id %}" class="btn btn-primary">ดูรายละเอียด</a>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <img src="{{ book.image_url }}" class="card-img-top" alt="{{ book.title }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ book.title }}</h5>
+                                <a href="{% url 'book' book_id=book.id %}" class="btn btn-primary">ดูรายละเอียด</a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                {% empty %}
+                    <p>ไม่มีหนังสือในขณะนี้</p>
                 {% endfor %}
             </div>
         </div>
