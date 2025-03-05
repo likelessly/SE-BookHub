@@ -11,23 +11,15 @@
     align-items: center;      /* Center vertically */
     height: 100vh;            /* Ensure the body takes up full viewport height */
     margin: 0;                /* Remove default margin */
-<<<<<<< HEAD
 }
-=======
-
->>>>>>> 1027e7a4f4d56c7504a4b5f7ed67c4dca63a6ae1
 
 .btn {
     font-weight: bold;
     text-align: center;
     padding: 0.5rem 1.0rem;
     border-radius: 9999px; /* Rounded edges */
-<<<<<<< HEAD
     background-color: #e67e22; /* Orange color */
     color: white;
-=======
-    
->>>>>>> 1027e7a4f4d56c7504a4b5f7ed67c4dca63a6ae1
     text-decoration: none;
     display: inline-block;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Shadow effect */
@@ -38,7 +30,6 @@
     width: auto;              /* Adjust width based on content */
     max-width: 300px;         /* Set a maximum width */
 }
-<<<<<<< HEAD
 body {
     background-image: url("{% static 'images/background.jpg' %}");
     background-size: cover; /* Ensures the image covers the entire page */
@@ -46,17 +37,11 @@ body {
     background-repeat: no-repeat; /* Prevents repeating the image */
     height: 100vh; /* Makes the background cover the full viewport height */
     margin: 0;
-=======
->>>>>>> 1027e7a4f4d56c7504a4b5f7ed67c4dca63a6ae1
 }
 
 .main-container {
     text-align: center; /* Centers content */
-<<<<<<< HEAD
     padding: 20px;
-=======
-    padding: 18px;
->>>>>>> 1027e7a4f4d56c7504a4b5f7ed67c4dca63a6ae1
 }
 
 
