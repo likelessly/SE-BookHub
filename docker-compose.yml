@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  django:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: django_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb+srv://OakJkpG:awZfdwaIMPNiHPNP@cluster0.aeia6.mongodb.net/
+    volumes:
+      - ./backend:/app
+
+  mongodb:
+    image: mongo:5.0
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - mongo-data:/data/db  # ให้ MongoDB เก็บข้อมูลถาวร
+
+volumes:
+  mongo-data:

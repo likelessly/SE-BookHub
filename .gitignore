@@ -1,0 +1,54 @@
+# Python/Django
+*.py[cod]
+__pycache__/
+db.sqlite3
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.db-journal
+*.tgz
+*.tar.gz
+*.bak
+*.swp
+*.swo
+*.idea/
+*.vscode/
+*.env
+*.env.*
+*.DS_Store
+*~
+local_settings.py
+settings.py
+media/
+static/
+__pycache__/
+*.py[cod]
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+
+# Node.js/React
+node_modules/
+npm-debug.log
+yarn-error.log
+*.tgz
+*.log
+
+# IDE files
+.idea/
+.vscode/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+docker-compose.override.*
