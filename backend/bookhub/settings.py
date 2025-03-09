@@ -129,7 +129,7 @@ WSGI_APPLICATION = 'bookhub.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-
+#database
 import os
 import environ
 
@@ -146,11 +146,6 @@ DATABASES = {
         'PORT': '6543',
     }
 }
-
-
-
-
-
 
 
 # Password validation
