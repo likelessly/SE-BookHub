@@ -8,6 +8,7 @@ import SignupPublisher from './pages/SignupPublisher';
 import AccountReader from './pages/AccountReader';
 import AccountPublisher from './pages/AccountPublisher';
 import ReadBook from './pages/ReadBook';
+import ReadBookWrapper from './pages/ReadBookWrapper'; // Fixed import
 
 function App() {
   return (
