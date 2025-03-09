@@ -14,17 +14,17 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/login/', { identifier, password });
-      const { token, role, userId } = response.data;
-  
-      // เก็บ token, role และ userId ใน localStorage
+      
+      // Get token and user info
+      const { token, role } = response.data;
+      const userId = response.data.userId || '1'; // Get userId from response or use default
+      
+      // Store in localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('role', role);
       localStorage.setItem('userId', userId);
-  
-      console.log("Token:", token);
-      console.log("Role:", role);
-  
-      // ใช้ navigate เพื่อไปยังหน้า Account ที่เหมาะสมตาม role
+      
+      // Navigate based on role
       if (role === 'reader') {
         navigate(`/account/reader/${userId}`);
       } else if (role === 'publisher') {
@@ -36,7 +36,6 @@ const Login = () => {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
     }
   };
-  
 
   return (
     <div className="auth-page">

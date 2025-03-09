@@ -22,18 +22,19 @@ class LoginView(APIView):
                 user = User.objects.get(email=identifier)
             else:
                 user = User.objects.get(username=identifier)
+                
             if not user.is_active:
-                return Response({"error": "Please verify your email address to activate your account."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Please verify your email address to activate your account."}, 
+                                status=status.HTTP_400_BAD_REQUEST)
 
             if user.check_password(password):
                 token, created = Token.objects.get_or_create(user=user)
-
-                # ✅ ตรวจสอบและสร้าง Profile ถ้ายังไม่มี
                 profile, _ = Profile.objects.get_or_create(user=user)
-
+                
                 return Response({
                     "token": token.key,
-                    "role": profile.user_type  # ✅ ดึง user_type จาก Profile
+                    "role": profile.user_type,
+                    "userId": user.id  # Add userId to the response
                 }, status=status.HTTP_200_OK)
             else:
                 return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
