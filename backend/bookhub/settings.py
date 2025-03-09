@@ -133,24 +133,19 @@ WSGI_APPLICATION = 'bookhub.wsgi.application'
 import os
 import environ
 
-# กำหนด BASE_DIR ก่อนใช้งาน
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 env = environ.Env()
-# โหลดไฟล์ .env จาก BASE_DIR
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env()
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DATABASE_NAME', default='postgres'),
-        'USER': env('DATABASE_USER', default='postgres'),
-        'PASSWORD': env('DATABASE_PASSWORD', default=''),
-        'HOST': env('DATABASE_HOST', default='localhost'),
-        'PORT': env('DATABASE_PORT', default='5432'),
+        'NAME': 'postgres',
+        'USER': 'postgres.csqtsflaklabqsnjlioy',
+        'PASSWORD': 'bookhubgroup10',
+        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
+        'PORT': '6543',
     }
 }
-
 
 
 # Password validation
