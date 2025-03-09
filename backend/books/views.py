@@ -104,7 +104,7 @@ class ReaderAccountView(APIView):
         borrow_serializer = BookBorrowSerializer(borrowed, many=True)
         data = {
             "user": {
-                "name": user.first_name,
+                "name": user.username,
                 "email": user.email,
                 "role": user.profile.user_type,
                 "registered_at": user.date_joined,
