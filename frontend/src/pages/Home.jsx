@@ -44,8 +44,8 @@ const Home = () => {
       {/* Main Content */}
       <main className="main-content">
         <h1>Discover & Share Amazing Books</h1>
-        <p>แพลตฟอร์มสำหรับนักอ่านที่ต้องการค้นหาและแบ่งปันหนังสือดี ๆ</p>
-        <Link to="/explore" className="cta-button">Explore Books</Link>
+        <h2>แพลตฟอร์มสำหรับนักอ่านที่ต้องการค้นหาและแบ่งปันหนังสือดี ๆ</h2>
+        <Link to="/main" className="cta-button">Let's Explore Books!</Link>
       </main>
 
       {/* Footer */}

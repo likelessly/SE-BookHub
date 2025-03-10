@@ -102,7 +102,7 @@ const AccountPublisher = () => {
   return (
     <div className="account-page">
       <div className="account-left">
-        <img src={accountData.user.profile_image || "/path/to/default_profile.png"} alt="Profile" />
+        <img src={accountData.user.profile_image || "/publisher_default.jpg"} alt="Profile" />
         <h2>{accountData.user.name}</h2>
         <p>Role: {accountData.user.role}</p>
         <p>Registered: {new Date(accountData.user.registered_at).toLocaleDateString()}</p>
