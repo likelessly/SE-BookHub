@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # ต้องอยู่ด้านบน
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -66,6 +66,18 @@ MIDDLEWARE = [
 # อนุญาตให้ทุก origin เชื่อมต่อ (สำหรับพัฒนา)
 CORS_ALLOW_ALL_ORIGINS = True
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://se-project-beta-backend.onrender.com",
+    "https://se-project-beta-frontend-git-master-oakjkpgs-projects.vercel.app",
+    "https://se-project-beta-frontend.vercel.app",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "https://se-project-beta-frontend.vercel.app",
+    "http://localhost:8000",
+]
+
+CORS_ORIGIN_ALLOW_ALL = True  # หรือจะระบุ URL ที่อนุญาตให้เชื่อมต่อจาก React โดยเฉพาะ
 # ตั้งค่า Email (สำหรับ demo ส่งไปที่ console)
 # ตั้งค่า Email Backend (ใช้ SMTP)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -85,25 +97,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
 }
-
-
-MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-CORS_ALLOWED_ORIGINS = [
-    "https://se-project-beta-frontend.vercel.app",
-    "http://localhost:8000",
-]
-
-CORS_ORIGIN_ALLOW_ALL = True  # หรือจะระบุ URL ที่อนุญาตให้เชื่อมต่อจาก React โดยเฉพาะ
 
 ROOT_URLCONF = 'bookhub.urls'
 
@@ -134,18 +127,19 @@ import os
 import environ
 
 env = environ.Env()
-environ.Env.read_env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres.csqtsflaklabqsnjlioy',
-        'PASSWORD': 'bookhubgroup10',
-        'HOST': 'aws-0-ap-southeast-1.pooler.supabase.com',
-        'PORT': '6543',
+        'NAME': env('DATABASE_NAME', default='postgres'),
+        'USER': env('DATABASE_USER', default='postgres.csqtsflaklabqsnjlioy'),
+        'PASSWORD': env('DATABASE_PASSWORD', default='bookhubgroup10'),
+        'HOST': env('DATABASE_HOST', default='aws-0-ap-southeast-1.pooler.supabase.com'),
+        'PORT': env('DATABASE_PORT', default='6543'),
     }
 }
+
 
 
 # Password validation
@@ -182,7 +176,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
