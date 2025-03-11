@@ -63,3 +63,7 @@ BookHub/
 │── README.md     
 │── docker-compose.yml       
 └── .gitignore           
+
+#if frontend have a problem
+npm install 
+npm run dev
