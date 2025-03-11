@@ -32,7 +32,6 @@ const AccountReader = () => {
       .post(`http://127.0.0.1:8000/api/books/return/${borrowId}/`, {}, {
         headers: { Authorization: `Token ${localStorage.getItem('token')}` },
       })
-      // eslint-disable-next-line no-unused-vars
       .then(response => {
         setAccountData(prev => ({
           ...prev,
@@ -44,7 +43,7 @@ const AccountReader = () => {
         alert('Return failed.');
       });
   };
-
+  
   if (error) return <p>{error}</p>;
   if (!accountData) return <p>Loading...</p>;
 
@@ -63,17 +62,21 @@ const AccountReader = () => {
       </div>
       <div className="account-right">
         <h3>Borrowed Books</h3>
-        {accountData.borrowed_books.map(borrow => (
-          <div key={borrow.id} className="book-item">
-            <img src={borrow.book.cover_image} alt={borrow.book.title} />
-            <div className="book-info">
-              <h4>{borrow.book.title}</h4>
-              <p>Due: {new Date(borrow.due_date).toLocaleDateString()}</p>
-              <button onClick={() => navigate(`/read/${borrow.id}`)}>Read Book</button>
-              <button onClick={() => handleReturn(borrow.id)}>Return</button>
+        {accountData.borrowed_books.length > 0 ? (
+          accountData.borrowed_books.map(borrow => (
+            <div key={borrow.id} className="book-item">
+              <img src={borrow.book.cover_image} alt={borrow.book.title} />
+              <div className="book-info">
+                <h4>{borrow.book.title}</h4>
+                <p>Due: {new Date(borrow.due_date).toLocaleDateString()}</p>
+                <button onClick={() => navigate(`/read/${borrow.id}`)}>Read Book</button>
+                <button onClick={() => handleReturn(borrow.id)}>Return</button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        ) : (
+          <p>No borrowed books.</p>
+        )}
       </div>
     </div>
   );

@@ -53,14 +53,9 @@ class BorrowBookView(APIView):
         if not book.is_available:
             return Response({"error": "Book is not available."},
                             status=status.HTTP_400_BAD_REQUEST)
-        # เปลี่ยนสถานะหนังสือและเพิ่ม borrow_count
-        book.is_available = False
-        book.borrow_count += 1
-        book.save()
-        borrow_entry = BookBorrow.objects.create(book=book, reader=user)
-        serializer = BookBorrowSerializer(borrow_entry)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        borrow = BookBorrow.objects.create(user=request.user, book=book)
+        return Response({'message': 'Book borrowed successfully!', 'borrow_id': borrow.id},
+                        status=status.HTTP_201_CREATED)
 # Reader คืนหนังสือ
 class ReturnBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]

@@ -11,6 +11,8 @@ import AccountReader from './pages/AccountReader';
 import AccountPublisher from './pages/AccountPublisher';
 import ReadBookWrapper from './pages/ReadBookWrapper';
 import MainPage from './pages/MainPage';
+import BookDetail from './pages/BookDetail';
+
 
 function App() {
   return (
@@ -27,6 +29,9 @@ function App() {
           <Route path="/account/reader/:userId" element={<AccountReader />} />
           <Route path="/account/publisher/:userId" element={<AccountPublisher />} />
           <Route path="/read/:borrowId" element={<ReadBookWrapper />} />
+          <Route path="/books/:bookId" element={<BookDetail />} />
+          <Route path="/books/:bookId/borrow" element={<BookDetail />} />
+
         </Routes>
       </Base>
     </Router>
