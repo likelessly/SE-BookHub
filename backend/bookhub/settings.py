@@ -140,7 +140,28 @@ DATABASES = {
     }
 }
 
+# ด้านบนไฟล์ settings.py
+import os
+import environ
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# ...
+
+# เพิ่มการตั้งค่า Storage ของ S3 (สำหรับ Supabase)
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME_MEDIA = env('AWS_STORAGE_BUCKET_NAME_MEDIA')
+AWS_STORAGE_BUCKET_NAME_PDF = env('AWS_STORAGE_BUCKET_NAME_PDF')
+AWS_S3_ENDPOINT_URL = env('AWS_S3_ENDPOINT_URL')
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

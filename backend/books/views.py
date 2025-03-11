@@ -8,11 +8,23 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
 from django.http import FileResponse
-from .models import BookBorrow
 from django.http import HttpResponse
+from .models import Tag
+from .serializers import TagSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
 
+# from supabase import create_client
+
+# SUPABASE_URL = "https://your-supabase-url"
+# SUPABASE_KEY = "your-supabase-key"
+# supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 def home(request):
     return HttpResponse("Welcome to Books API!")
+
+class TagListView(generics.ListAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = [permissions.IsAuthenticated]  # ปรับตามที่ต้องการ
 
 # สำหรับหน้า Main: แสดงรายการหนังสือทั้งหมด
 class BookListView(generics.ListAPIView):
@@ -64,20 +76,14 @@ class ReturnBookView(APIView):
                         status=status.HTTP_200_OK)
 
 # Publisher เพิ่มหนังสือ
-class AddBookView(APIView):
+class AddBookView(generics.CreateAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]  # รองรับไฟล์ upload
 
-    def post(self, request):
-        user = request.user
-        if user.profile.user_type != 'publisher':
-            return Response({"error": "Only publishers can add books."},
-                            status=status.HTTP_403_FORBIDDEN)
-        # เพิ่ม publisher เข้า validated_data โดยอัตโนมัติ
-        serializer = BookSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(publisher=user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(publisher=self.request.user)  # บันทึกหนังสือกับ Publisher
 
 # Publisher ลบหนังสือ (เฉพาะหนังสือของตัวเอง)
 class RemoveBookView(APIView):
@@ -89,6 +95,20 @@ class RemoveBookView(APIView):
         book.delete()
         return Response({"message": "Book removed successfully."},
                         status=status.HTTP_200_OK)
+    # def remove_book(request, book_id):
+    #     book = get_object_or_404(Book, id=book_id)
+
+    #     # ลบไฟล์ใน Supabase Storage
+    #     if book.cover_image:
+    #         supabase.storage.from_("books").remove([book.cover_image])
+    #     if book.pdf_file:
+    #         supabase.storage.from_("books").remove([book.pdf_file])
+
+    #     # ลบจาก Database
+    #     book.delete()
+    #     return Response({"message": "Book removed successfully"}, status=204)
+
+    
 
 # ข้อมูล account สำหรับ Reader
 class ReaderAccountView(APIView):

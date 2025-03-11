@@ -16,7 +16,8 @@ BookHub/
 │   ├── bookhub/ 
 │   │   │   └── settings.py    
 │   ├── books/  
-│   │   └── views.py      
+│   │   └── views.py   
+│   │   └── storages.py   
 │   ├── users/
 │   ├── venv/                  
 │   ├── manage.py        

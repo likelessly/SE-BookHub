@@ -2,6 +2,11 @@
 from rest_framework import serializers
 from .models import Book, BookBorrow, Tag
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
+
 class BookSerializer(serializers.ModelSerializer):
     # แสดงแท็กในรูปแบบของชื่อ
     tags = serializers.SlugRelatedField(
@@ -35,6 +40,9 @@ class BookSerializer(serializers.ModelSerializer):
         return obj.publisher.first_name
 
     def create(self, validated_data):
+        # นำ field tags ออกจาก validated_data เพื่อป้องกันการ assign โดยตรง
+        validated_data.pop('tags', None)
+        
         custom_tag = validated_data.pop('custom_tag', None)
         selected_tags = validated_data.pop('selectedTags', [])
         # สร้างหนังสือใหม่โดยไม่มีแท็ก
@@ -51,6 +59,7 @@ class BookSerializer(serializers.ModelSerializer):
             tag_obj, created = Tag.objects.get_or_create(name=custom_tag)
             book.tags.add(tag_obj)
         return book
+
 
 class BookBorrowSerializer(serializers.ModelSerializer):
     # แสดงข้อมูลหนังสือในแบบ nested

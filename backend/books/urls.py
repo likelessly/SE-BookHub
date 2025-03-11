@@ -1,4 +1,3 @@
-# books/urls.py
 from django.urls import path
 from . import views
 from .views import (
@@ -11,6 +10,7 @@ from .views import (
     ReaderAccountView,
     PublisherAccountView,
     ReadBookView,
+    TagListView,  # นำเข้า TagListView
 )
 
 urlpatterns = [
@@ -24,5 +24,5 @@ urlpatterns = [
     path('account/reader/', ReaderAccountView.as_view(), name='reader_account'),
     path('account/publisher/', PublisherAccountView.as_view(), name='publisher_account'),
     path('books/read/<int:borrow_id>/', ReadBookView.as_view(), name='read_book'),
+    path('tags/', TagListView.as_view(), name='tag_list'),
 ]
-
