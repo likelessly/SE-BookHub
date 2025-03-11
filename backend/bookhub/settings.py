@@ -163,6 +163,7 @@ AWS_S3_ENDPOINT_URL = 'https://csqtsflaklabqsnjlioy.supabase.co/storage/v1/s3'
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
+AWS_S3_REGION_NAME = 'ap-southeast-1'  # เพิ่ม Region
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -188,7 +189,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Bangkok'  # ตั้งค่า Timezone ให้ถูกต้อง
 
 USE_I18N = True
 

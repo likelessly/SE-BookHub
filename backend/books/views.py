@@ -13,33 +13,24 @@ from .models import Tag
 from .serializers import TagSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 
-# from supabase import create_client
-
-# SUPABASE_URL = "https://your-supabase-url"
-# SUPABASE_KEY = "your-supabase-key"
-# supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 def home(request):
     return HttpResponse("Welcome to Books API!")
 
 class TagListView(generics.ListAPIView):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [permissions.IsAuthenticated]  # ปรับตามที่ต้องการ
+    permission_classes = [permissions.IsAuthenticated]
 
-# สำหรับหน้า Main: แสดงรายการหนังสือทั้งหมด
 class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-# แสดงรายละเอียดหนังสือ (รวมเวลายืมได้)
 class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-
-# Reader ยืมหนังสือ
 class BorrowBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -53,10 +44,12 @@ class BorrowBookView(APIView):
         if not book.is_available:
             return Response({"error": "Book is not available."},
                             status=status.HTTP_400_BAD_REQUEST)
-        borrow = BookBorrow.objects.create(user=request.user, book=book)
+        borrow = BookBorrow.objects.create(reader=request.user, book=book)
+        book.borrow_count += 1
+        book.save()
         return Response({'message': 'Book borrowed successfully!', 'borrow_id': borrow.id},
                         status=status.HTTP_201_CREATED)
-# Reader คืนหนังสือ
+
 class ReturnBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -64,23 +57,22 @@ class ReturnBookView(APIView):
         user = request.user
         borrow_entry = get_object_or_404(BookBorrow, id=borrow_id, reader=user)
         book = borrow_entry.book
-        book.is_available = True
+        book.borrow_count -= 1
         book.save()
-        borrow_entry.delete()
+        borrow_entry.returned_at = timezone.now() # บันทึกวันที่คืนหนังสือ
+        borrow_entry.save()
         return Response({"message": "Book returned successfully."},
                         status=status.HTTP_200_OK)
 
-# Publisher เพิ่มหนังสือ
 class AddBookView(generics.CreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]  # รองรับไฟล์ upload
+    parser_classes = [MultiPartParser, FormParser]
 
     def perform_create(self, serializer):
-        serializer.save(publisher=self.request.user)  # บันทึกหนังสือกับ Publisher
+        serializer.save(publisher=self.request.user)
 
-# Publisher ลบหนังสือ (เฉพาะหนังสือของตัวเอง)
 class RemoveBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -90,22 +82,7 @@ class RemoveBookView(APIView):
         book.delete()
         return Response({"message": "Book removed successfully."},
                         status=status.HTTP_200_OK)
-    # def remove_book(request, book_id):
-    #     book = get_object_or_404(Book, id=book_id)
 
-    #     # ลบไฟล์ใน Supabase Storage
-    #     if book.cover_image:
-    #         supabase.storage.from_("books").remove([book.cover_image])
-    #     if book.pdf_file:
-    #         supabase.storage.from_("books").remove([book.pdf_file])
-
-    #     # ลบจาก Database
-    #     book.delete()
-    #     return Response({"message": "Book removed successfully"}, status=204)
-
-    
-
-# ข้อมูล account สำหรับ Reader
 class ReaderAccountView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -115,7 +92,6 @@ class ReaderAccountView(APIView):
             return Response({"error": "Not authorized."},
                             status=status.HTTP_403_FORBIDDEN)
         borrowed = BookBorrow.objects.filter(reader=user)
-        from .serializers import BookBorrowSerializer  # ใช้ serializer ที่สร้างไว้
         borrow_serializer = BookBorrowSerializer(borrowed, many=True)
         data = {
             "user": {
@@ -130,7 +106,6 @@ class ReaderAccountView(APIView):
         }
         return Response(data, status=status.HTTP_200_OK)
 
-# ข้อมูล account สำหรับ Publisher
 class PublisherAccountView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -158,11 +133,9 @@ class ReadBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, borrow_id):
-        # ดึง borrow entry สำหรับผู้ใช้ที่ล็อกอินอยู่
         borrow_entry = get_object_or_404(BookBorrow, id=borrow_id, reader=request.user)
         now = timezone.now()
         if now > borrow_entry.due_date:
-            # หากหมดเวลา ให้ลบ entry และแจ้งให้ทราบว่าไม่สามารถเข้าถึงได้อีก
             borrow_entry.delete()
             return Response({"error": "Borrow period expired. This book is no longer accessible."},
                             status=status.HTTP_403_FORBIDDEN)
@@ -170,7 +143,6 @@ class ReadBookView(APIView):
         if not book.pdf_file:
             return Response({"error": "PDF not available."},
                             status=status.HTTP_404_NOT_FOUND)
-        # ส่งไฟล์ PDF เป็น inline content (ไม่ให้ดาวน์โหลดโดยตรง)
         response = FileResponse(book.pdf_file.open('rb'), content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="{}"'.format(book.pdf_file.name)
         return response

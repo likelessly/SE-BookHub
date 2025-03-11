@@ -9,7 +9,6 @@ const AccountPublisher = () => {
   const [showAddBookModal, setShowAddBookModal] = useState(false);
   const [showTagModal, setShowTagModal] = useState(false);
   const [availableTags, setAvailableTags] = useState([]);
-  // const [editingBook, setEditingBook] = useState(null);
   const [newBook, setNewBook] = useState({
     title: '',
     description: '',
@@ -17,13 +16,11 @@ const AccountPublisher = () => {
     max_borrowers: 1,
     cover_image: null,
     pdf_file: null,
-    selectedTags: [],  // เก็บชื่อแท็กที่เลือก (จากฐานข้อมูล)
-    custom_tag: '',    // เพิ่มแท็กใหม่ได้เพียง 1 แท็กต่อหนังสือ
+    selectedTags: [],
+    custom_tag: '',
   });
-  // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
 
-  // ดึงข้อมูลบัญชี Publisher เมื่อ component mount
   useEffect(() => {
     axios
       .get('http://127.0.0.1:8000/api/account/publisher/', {
@@ -36,7 +33,6 @@ const AccountPublisher = () => {
       });
   }, []);
 
-  // ฟังก์ชันลบหนังสือของ Publisher
   const handleRemoveBook = (bookId) => {
     axios
       .delete(`http://127.0.0.1:8000/api/books/remove/${bookId}/`, {
@@ -55,7 +51,6 @@ const AccountPublisher = () => {
       });
   };
 
-  // ฟังก์ชันสำหรับส่งข้อมูลหนังสือใหม่เพื่อเพิ่มหนังสือ
   const handleAddBookSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -63,11 +58,15 @@ const AccountPublisher = () => {
     formData.append('description', newBook.description);
     formData.append('lending_period', newBook.lending_period);
     formData.append('max_borrowers', newBook.max_borrowers);
-    // ส่ง selectedTags เป็น JSON string
     formData.append('selectedTags', JSON.stringify(newBook.selectedTags));
     if (newBook.custom_tag) formData.append('custom_tag', newBook.custom_tag);
-    if (newBook.cover_image) formData.append('cover_image', newBook.cover_image);
-    if (newBook.pdf_file) formData.append('pdf_file', newBook.pdf_file);
+
+    if (newBook.cover_image) {
+      formData.append('cover_image', newBook.cover_image, newBook.cover_image.name);
+    }
+    if (newBook.pdf_file) {
+      formData.append('pdf_file', newBook.pdf_file, newBook.pdf_file.name);
+    }
 
     axios
       .post('http://127.0.0.1:8000/api/books/add/', formData, {
@@ -82,7 +81,6 @@ const AccountPublisher = () => {
           published_books: [...prev.published_books, response.data]
         }));
         setShowAddBookModal(false);
-        // Reset newBook state
         setNewBook({
           title: '',
           description: '',
@@ -91,7 +89,7 @@ const AccountPublisher = () => {
           cover_image: null,
           pdf_file: null,
           selectedTags: [],
-          custom_tag: ''
+          custom_tag: '',
         });
       })
       .catch(err => {
@@ -100,29 +98,6 @@ const AccountPublisher = () => {
       });
   };
 
-  // const handleEditBook = (book) => {
-  //   setEditingBook(book);
-  // };
-
-  // const handleEditSubmit = (e) => {
-  //   e.preventDefault();
-  //   axios.put(`http://127.0.0.1:8000/api/books/edit/${editingBook.id}/`, editingBook, {
-  //     headers: { Authorization: `Token ${localStorage.getItem('token')}` },
-  //   })
-  //   .then(response => {
-  //     setAccountData(prev => ({
-  //       ...prev,
-  //       published_books: prev.published_books.map(b => (b.id === editingBook.id ? response.data : b))
-  //     }));
-  //     setEditingBook(null);
-  //   })
-  //   .catch(err => {
-  //     console.error("Error updating book:", err.response?.data);
-  //     alert('Failed to update book.');
-  //   });
-  // };
-
-  // ฟังก์ชันดึงแท็กทั้งหมดจากฐานข้อมูล
   const fetchAvailableTags = () => {
     axios
       .get('http://127.0.0.1:8000/api/tags/', {
@@ -137,13 +112,11 @@ const AccountPublisher = () => {
       });
   };
 
-  // เปิด modal สำหรับเลือกแท็กหนังสือ
   const openTagModal = () => {
     fetchAvailableTags();
     setShowTagModal(true);
   };
 
-  // จัดการการเลือก/ยกเลิกแท็ก
   const handleTagSelection = (tagName) => {
     let updatedTags = [...newBook.selectedTags];
     if (updatedTags.includes(tagName)) {
@@ -159,7 +132,6 @@ const AccountPublisher = () => {
 
   return (
     <div className="account-page">
-      {/* ด้านซ้าย: แสดงข้อมูลบัญชี Publisher */}
       <div className="account-left">
         <img src={accountData.user.profile_image || "/publisher_default.jpg"} alt="Profile" />
         <h2>{accountData.user.name}</h2>
@@ -172,7 +144,6 @@ const AccountPublisher = () => {
         }}>Logout</button>
       </div>
 
-      {/* ด้านขวา: ปุ่มเพิ่มหนังสือและรายการหนังสือ */}
       <div className="account-right">
         <div className="top-controls">
           <button onClick={() => setShowAddBookModal(true)}>เพิ่มหนังสือ</button>
@@ -181,14 +152,21 @@ const AccountPublisher = () => {
         <div className="books-list">
           {accountData.published_books.map(book => (
             <div key={book.id} className="book-item">
-              <img src={book.cover_image ? "https://csqtsflaklabqsnjlioy.supabase.co/storage/v1/object/public/Bookhub_media/cover/${book.cover_image}" : "/cover_default.jpg"} 
-                alt={book.title} />
+              {console.log("book.cover_image:", book.cover_image)}
+              <img
+                src={`${book.cover_image}`}
+                alt={book.title}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/cover_default.jpg";
+                }}
+              />
               <div className="book-info">
                 <h4>{book.title}</h4>
                 <p>จำนวนถูกยืม: {book.borrow_count}</p>
                 <div className="book-actions">
+                  <button onClick={() => navigate(`/edit-book/${book.id}`)}>แก้ไขหนังสือ</button>
                   <button onClick={() => handleRemoveBook(book.id)}>ถอนหนังสือ</button>
-                  {/* <button onClick={() => handleEditBook(book)}>แก้ไขหนังสือ</button> */}
                 </div>
               </div>
             </div>
@@ -196,7 +174,6 @@ const AccountPublisher = () => {
         </div>
       </div>
 
-      {/* Modal สำหรับเพิ่มหนังสือ */}
       {showAddBookModal && (
         <div className="modal">
           <div className="modal-content">
@@ -280,7 +257,6 @@ const AccountPublisher = () => {
         </div>
       )}
 
-      {/* Modal สำหรับเลือกแท็กหนังสือ */}
       {showTagModal && (
         <div className="modal tag-modal">
           <div className="modal-content">
@@ -309,23 +285,6 @@ const AccountPublisher = () => {
           </div>
         </div>
       )}
-
-      {/* {editingBook && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>แก้ไขหนังสือ</h3>
-            <form onSubmit={handleEditSubmit}>
-              <label>ชื่อหนังสือ:</label>
-              <input type="text" value={editingBook.title} onChange={(e) => setEditingBook({ ...editingBook, title: e.target.value })} required />
-              <label>คำอธิบาย:</label>
-              <textarea value={editingBook.description} onChange={(e) => setEditingBook({ ...editingBook, description: e.target.value })} required />
-              <div className="modal-actions">
-                <button type="submit">บันทึก</button>
-                <button type="button" onClick={() => setEditingBook(null)}>ยกเลิก</button>
-              </div>
-            </form>
-          </div>
-        </div> */}
     </div>
   );
 };

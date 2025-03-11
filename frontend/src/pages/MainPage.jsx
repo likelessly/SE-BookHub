@@ -10,7 +10,6 @@ const MainPage = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [tags, setTags] = useState([]);
   const [user, setUser] = useState(null);
-  const [isTagOpen, setIsTagOpen] = useState(false);
   
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -37,6 +36,7 @@ const MainPage = () => {
     .catch(err => console.error("Error fetching tags:", err));
 
     // ดึงข้อมูลผู้ใช้
+    
     axios.get('http://127.0.0.1:8000/api/account/info/', {
       headers: { Authorization: `Token ${token}` },
     })
@@ -51,8 +51,6 @@ const MainPage = () => {
       (Array.isArray(book.tags) ? selectedTags.some(tag => book.tags.includes(tag)) : book.tags.split(',').some(tag => selectedTags.includes(tag)));
     return matchesSearch && matchesTags;
   });
-  
-
 
   if (error) return <div>{error}</div>;
 
@@ -65,32 +63,25 @@ const MainPage = () => {
 
       <div className="content-container">
         {/* Sidebar สำหรับเลือกแท็ก */}
-        <div className={`sidebar ${isTagOpen ? 'open' : 'closed'}`}>
-          <button className="toggle-btn" onClick={() => setIsTagOpen(!isTagOpen)}>
-            {isTagOpen ? 'Hide Tags' : 'Show Tags'}
-          </button>
-          {isTagOpen && (
-            <div className="tag-filter">
-              <h3>Filter by Tags</h3>
-              {tags.map(tag => (
-                <div key={tag.id} className="tag-option">
-                  <input 
-                    type="checkbox"
-                    value={tag.name}
-                    checked={selectedTags.includes(tag.name)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedTags(prev => [...prev, tag.name]);
-                      } else {
-                        setSelectedTags(prev => prev.filter(t => t !== tag.name));
-                      }
-                    }}
-                  />
-                  <span>{tag.name}</span>
-                </div>
-              ))}
+        <div className="sidebar">
+          <h3>Filter by Tags</h3>
+          {tags.map(tag => (
+            <div key={tag.id} className="tag-option">
+              <input 
+                type="checkbox"
+                value={tag.name}
+                checked={selectedTags.includes(tag.name)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedTags(prev => [...prev, tag.name]);
+                  } else {
+                    setSelectedTags(prev => prev.filter(t => t !== tag.name));
+                  }
+                }}
+              />
+              <span>{tag.name}</span>
             </div>
-          )}
+          ))}
         </div>
 
         {/* ส่วนหลักของหน้าที่แสดงหนังสือ */}
