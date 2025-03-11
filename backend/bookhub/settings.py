@@ -156,6 +156,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_ACCESS_KEY_ID = 'c49a8e18bc3c5e77af94d2ca2c0a15a3'
 AWS_SECRET_ACCESS_KEY = 'a2f4b00062bae252566a0283ec7820295e142307dcaf3a3f2b21056c9dcb7067'
+AWS_STORAGE_BUCKET_NAME = 'Bookhub_media'  # Default bucket name
 AWS_STORAGE_BUCKET_NAME_MEDIA = 'Bookhub_media'
 AWS_STORAGE_BUCKET_NAME_PDF = 'Bookhub_pdf'
 AWS_S3_ENDPOINT_URL = 'https://csqtsflaklabqsnjlioy.supabase.co/storage/v1/s3'
