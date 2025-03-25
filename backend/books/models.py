@@ -22,26 +22,13 @@ class Book(models.Model):
     max_borrowers = models.PositiveIntegerField(default=1)    # จำนวนคนที่สามารถยืมได้พร้อมกัน
     tags = models.ManyToManyField('Tag', through='BookTag', blank=True)
     borrow_count = models.PositiveIntegerField(default=0)      # สำหรับสถิติการยืม
-    
-    # def current_borrows(self):
-    #     """ คำนวณจำนวนที่ถูกยืมไปแล้ว (เฉพาะที่ยังไม่คืน) """
-    #     return self.borrow_set.filter(returned_at__isnull=True).count()
 
-    # @property
-    # def remaining_borrows(self):
-    #     """ จำนวนที่ยังสามารถยืมได้ """
-    #     return max(0, self.max_borrowers - self.current_borrows())
-
-    # @property
-    # def is_available(self):
-    #     """ คืนค่า True ถ้ายังมีให้ยืม """
-    #     return self.remaining_borrows > 0
-    
     def remaining_borrows(self):
-        # นับจำนวน BookBorrow ที่ยังมีอยู่ (ยังไม่คืน)
-        current_borrows = self.borrows.count()
-        remaining = self.max_borrowers - current_borrows
-        return remaining
+        return self.max_borrowers - self.borrows.filter(returned_at__isnull=True).count()
+
+    @property
+    def is_available(self):
+        return self.remaining_borrows() > 0
 
     def __str__(self):
         return self.title
@@ -62,10 +49,10 @@ class BookBorrow(models.Model):
     )
     borrow_date = models.DateTimeField(auto_now_add=True)
     due_date = models.DateTimeField()
+    returned_at = models.DateTimeField(null=True, blank=True) # เพิ่ม field returned_at
 
     @property
     def is_returned(self):
-        """ ตรวจสอบว่าคืนหนังสือแล้วหรือยัง """
         return self.returned_at is not None
     
     def save(self, *args, **kwargs):

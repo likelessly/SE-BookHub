@@ -10,8 +10,9 @@ from .serializers import (
 )
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-from .models import Profile  # ✅ Import Profilefrom 
+from .models import Profile  # ✅ Import Profile
 from .serializers import serializers
+
 class LoginView(APIView):
     def post(self, request):
         identifier = request.data.get('identifier')

@@ -4,13 +4,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './BookDetail.css';
 
 const BookDetail = () => {
-  const { bookId } = useParams(); // รับ bookId จาก URL
-  const [book, setBook] = useState(null); // เก็บข้อมูลหนังสือ
-  const [error, setError] = useState(null); // เก็บ error ถ้ามี
-  const [loading, setLoading] = useState(true); // ตรวจสอบสถานะการโหลดข้อมูล
-  const navigate = useNavigate(); // สำหรับการเปลี่ยนเส้นทางหลังจากยืมหนังสือสำเร็จ
+  const { bookId } = useParams();
+  const [book, setBook] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const role = localStorage.getItem('role');
 
-  // ดึงข้อมูลหนังสือจาก API
   useEffect(() => {
     axios
       .get(`http://127.0.0.1:8000/api/books/${bookId}/`, {
@@ -20,6 +20,7 @@ const BookDetail = () => {
         setBook(response.data);
         setLoading(false);
       })
+      // eslint-disable-next-line no-unused-vars
       .catch((err) => {
         setError('Failed to load book details.');
         setLoading(false);
@@ -30,34 +31,48 @@ const BookDetail = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       alert('You must be logged in to borrow a book.');
-      navigate('/login'); // เปลี่ยนเส้นทางไปที่หน้า Login
+      navigate('/login');
       return;
     }
 
-    if (book.available_copies <= 0) {
+    if (!book.is_available) {
       alert('No available copies of this book to borrow.');
       return;
     }
 
-    // ส่งข้อมูลการยืมไปที่ API
     axios
       .post(
-        `http://127.0.0.1:8000/api/borrow/`,
-        { book_id: book.id }, // ส่ง ID ของหนังสือ
+        `http://127.0.0.1:8000/api/books/borrow/`,
+        { book_id: book.id },
         { headers: { Authorization: `Token ${token}` } }
       )
       .then((response) => {
         alert('Book borrowed successfully!');
-        // อัพเดตจำนวนสำเนาหลังจากยืม
-        setBook((prevBook) => ({
-          ...prevBook,
-          available_copies: prevBook.available_copies - 1,
-        }));
+        navigate(`/account/reader/${response.data.user_id}`);
       })
       .catch((err) => {
         console.error('Error borrowing book:', err.response?.data);
         alert('Failed to borrow book.');
       });
+  };
+
+  const handleRemoveBook = () => {
+    axios
+      .delete(`http://127.0.0.1:8000/api/books/remove/${bookId}/`, {
+        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+      })
+      .then(() => {
+        alert('Book removed successfully!');
+        navigate('/account/publisher');
+      })
+      .catch((err) => {
+        console.error('Error removing book:', err.response?.data);
+        alert('Failed to remove book.');
+      });
+  };
+
+  const handleEditBook = () => {
+    navigate(`/edit-book/${bookId}`);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -69,7 +84,7 @@ const BookDetail = () => {
         <img
           src={
             book.cover_image
-              ? `https://csqtsflaklabqsnjlioy.supabase.co/storage/v1/object/public/Bookhub_media/cover/${book.cover_image}`
+              ? `${book.cover_image}`
               : '/cover_default.jpg'
           }
           alt={book.title}
@@ -88,11 +103,17 @@ const BookDetail = () => {
         </p>
         <p>
           <strong>Available Copies: </strong>
-          {book.available_copies}
+          {book.remaining_borrows}
         </p>
-        <button onClick={handleBorrowBook} disabled={!book.is_available}>
-          {book.is_available ? "Borrow Book" : "Not Available"}
-        </button>
+        {role === 'reader' && (
+          <button onClick={handleBorrowBook}>Borrow Book</button>
+        )}
+        {role === 'publisher' && (
+          <>
+            <button onClick={handleEditBook}>Edit Book</button>
+            <button onClick={handleRemoveBook}>Remove Book</button>
+          </>
+        )}
       </div>
     </div>
   );
