@@ -12,7 +12,7 @@ const MainPage = () => {
   const [user, setUser] = useState(null);
   const [isTagOpen, setIsTagOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -31,72 +31,61 @@ const MainPage = () => {
     axios.get('http://127.0.0.1:8000/api/books/', {
       headers: { Authorization: `Token ${token}` },
     })
-    .then(response => logResponse('Books', response))
-    .then(response => setBooks(response.data))
-    .catch(err => {
-      console.error("Error fetching books:", err);
-      setError('Failed to load books. Please try again later.');
-    })
-    .finally(() => setLoading(false));
+      .then(response => logResponse('Books', response))
+      .then(response => setBooks(response.data))
+      .catch(err => {
+        console.error("Error fetching books:", err);
+        setError('Failed to load books. Please try again later.');
+      })
+      .finally(() => setLoading(false));
 
     // ดึงข้อมูลแท็กทั้งหมดจาก Database
     axios.get('http://127.0.0.1:8000/api/tags/', {
       headers: { Authorization: `Token ${token}` },
     })
-    .then(response => logResponse('Tags', response))
-    .then(response => setTags(response.data))
-    .catch(err => console.error("Error fetching tags:", err));
+      .then(response => logResponse('Tags', response))
+      .then(response => setTags(response.data))
+      .catch(err => console.error("Error fetching tags:", err));
 
     // ดึงข้อมูลผู้ใช้
-    
-    axios.get('http://127.0.0.1:8000/api/account/info/', {
+    axios.get('http://127.0.0.1:8000/api/account/reader/', {
       headers: { Authorization: `Token ${token}` },
     })
-    .then(response => logResponse('User', response))
-    .then(response => {
-      // Fix: Store just the user object from the response
-      // The API returns { user: {...}, borrowed_books: [...] }
-      setUser(response.data.user);
-    })
-    .catch(err => {
-      console.error("Error fetching user info:", err);
-      // Try alternative user info endpoint
-      const role = localStorage.getItem('role');
-      if (role === 'publisher') {
-        axios.get('http://127.0.0.1:8000/api/account/publisher/', {
-          headers: { Authorization: `Token ${token}` },
-        })
-        .then(response => logResponse('Publisher', response))
-        .then(response => setUser(response.data.user))
-        .catch(err => console.error("Error fetching publisher info:", err));
-      }
-    });
+      .then(response => logResponse('User', response))
+      .then(response => {
+        // Fix: Store just the user object from the response
+        // The API returns { user: {...}, borrowed_books: [...] }
+        setUser(response.data.user);
+      })
+      .catch(err => {
+        console.error("Error fetching user info:", err);
+        // Try alternative user info endpoint
+        const role = localStorage.getItem('role');
+        if (role === 'publisher') {
+          axios.get('http://127.0.0.1:8000/api/account/publisher/', {
+            headers: { Authorization: `Token ${token}` },
+          })
+            .then(response => logResponse('Publisher', response))
+            .then(response => setUser(response.data.user))
+            .catch(err => console.error("Error fetching publisher info:", err));
+        }
+      });
   }, []);
 
   // ฟังก์ชันกรองหนังสือตาม search query และ selected tags
   const filteredBooks = books.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTags = selectedTags.length === 0 || 
+    const matchesTags = selectedTags.length === 0 ||
       (Array.isArray(book.tags) ? selectedTags.some(tag => book.tags.includes(tag)) : book.tags && typeof book.tags === 'string' ? book.tags.split(',').some(tag => selectedTags.includes(tag)) : false);
     return matchesSearch && matchesTags;
   });
-  
-  // Helper function to get user display name
-  const getUserDisplayName = () => {
-    if (!user) return 'Guest';
-    
-    // Try all possible name fields in order of preference
-    return user.name || user.username || user.first_name || 
-           (user.email ? user.email.split('@')[0] : 'Reader');
-  };
 
-  if (error) return <div className="error-message">{error}</div>;
 
   return (
     <div className="main-page">
       {/* คำทักทายด้านบน */}
       <header className="header">
-        <h2>Welcome, {getUserDisplayName()}!</h2>
+        <h2>Welcome, {user ? (user.first_name || user.username || user.name || 'Reader') : 'Guest'}!</h2>
       </header>
 
       <div className="content-container">
@@ -105,7 +94,7 @@ const MainPage = () => {
           <h3>Filter by Tags</h3>
           {tags.map(tag => (
             <div key={tag.id} className="tag-option">
-              <input 
+              <input
                 type="checkbox"
                 value={tag.name}
                 checked={selectedTags.includes(tag.name)}
@@ -126,7 +115,7 @@ const MainPage = () => {
         <div className="main-content">
           {/* Search Bar ด้านขวาบน */}
           <div className="search-container">
-            <input 
+            <input
               type="text"
               placeholder="Search books..."
               value={searchQuery}
