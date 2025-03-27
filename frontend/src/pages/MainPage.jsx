@@ -75,11 +75,24 @@ const MainPage = () => {
   // ฟังก์ชันกรองหนังสือตาม search query และ selected tags
   const filteredBooks = books.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTags = selectedTags.length === 0 ||
-      (Array.isArray(book.tags) ? selectedTags.some(tag => book.tags.includes(tag)) : book.tags && typeof book.tags === 'string' ? book.tags.split(',').some(tag => selectedTags.includes(tag)) : false);
+    const matchesTags = selectedTags.length === 0 || 
+      (book.tags && selectedTags.every(tag => book.tags.includes(tag)));
     return matchesSearch && matchesTags;
   });
 
+  // Add tag management functions
+  const handleTagSelect = (tagName) => {
+    setSelectedTags(prev => 
+      prev.includes(tagName) 
+        ? prev.filter(t => t !== tagName)
+        : [...prev, tagName]
+    );
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedTags([]);
+  };
 
   return (
     <div className="main-page">
@@ -91,24 +104,32 @@ const MainPage = () => {
       <div className="content-container">
         {/* Sidebar สำหรับเลือกแท็ก */}
         <div className="sidebar">
-          <h3>Filter by Tags</h3>
-          {tags.map(tag => (
-            <div key={tag.id} className="tag-option">
-              <input
-                type="checkbox"
-                value={tag.name}
-                checked={selectedTags.includes(tag.name)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedTags(prev => [...prev, tag.name]);
-                  } else {
-                    setSelectedTags(prev => prev.filter(t => t !== tag.name));
-                  }
-                }}
-              />
-              <span>{tag.name}</span>
-            </div>
-          ))}
+          <div className="tag-header">
+            <h3>Filter by Tags</h3>
+            {selectedTags.length > 0 && (
+              <button onClick={clearFilters} className="clear-tags">
+                Clear All
+              </button>
+            )}
+          </div>
+          <div className="tags-container">
+            {tags.map(tag => (
+              <div key={tag.id} className="tag-option">
+                <label className="tag-checkbox">
+                  <input
+                    type="checkbox"
+                    value={tag.name}
+                    checked={selectedTags.includes(tag.name)}
+                    onChange={() => handleTagSelect(tag.name)}
+                  />
+                  <span className="tag-name">{tag.name}</span>
+                  <span className="tag-count">
+                    {books.filter(book => book.tags?.includes(tag.name)).length}
+                  </span>
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* ส่วนหลักของหน้าที่แสดงหนังสือ */}

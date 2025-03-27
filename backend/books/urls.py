@@ -11,6 +11,7 @@ from .views import (
     PublisherAccountView,
     ReadBookView,
     TagListView,  # นำเข้า TagListView
+    EditBookView,
 )
 
 urlpatterns = [
@@ -25,4 +26,5 @@ urlpatterns = [
     path('account/publisher/', PublisherAccountView.as_view(), name='publisher_account'),
     path('books/read/<int:borrow_id>/', ReadBookView.as_view(), name='read_book'),
     path('tags/', TagListView.as_view(), name='tag_list'),
+    path('books/update/<int:book_id>/', EditBookView.as_view(), name='book-update'),
 ]

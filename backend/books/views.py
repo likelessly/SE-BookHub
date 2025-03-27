@@ -146,3 +146,29 @@ class ReadBookView(APIView):
         response = FileResponse(book.pdf_file.open('rb'), content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="{}"'.format(book.pdf_file.name)
         return response
+
+class EditBookView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, book_id):
+        try:
+            # Get book and verify ownership
+            book = Book.objects.get(id=book_id, publisher=request.user)
+            
+            # Update book with partial data
+            serializer = BookSerializer(
+                book,
+                data=request.data,
+                partial=True  # Allow partial updates
+            )
+            
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Book.DoesNotExist:
+            return Response(
+                {"detail": "Book not found or you don't have permission to edit it"},
+                status=status.HTTP_404_NOT_FOUND
+            )

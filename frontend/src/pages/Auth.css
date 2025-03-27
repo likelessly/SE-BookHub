@@ -1,49 +1,199 @@
 /* src/pages/Auth.css */
 .auth-page {
-    max-width: 400px;
-    margin: 2rem auto;
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  max-width: 450px;
+  margin: 40px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.auth-page h2 {
+  color: #ff6b00;
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.auth-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-page form > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-page label {
+  color: #333;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.auth-page input {
+  padding: 12px 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: #f8f8f8;
+}
+
+.auth-page input:focus {
+  border-color: #ff6b00;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
+  background-color: #fff;
+}
+
+.auth-page button[type="submit"] {
+  background-color: #ff6b00;
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 10px;
+}
+
+.auth-page button[type="submit"]:hover {
+  background-color: #ff8533;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.2);
+}
+
+.auth-page button[type="submit"]:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.separator {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 25px 0;
+  color: #666;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+
+.separator span {
+  padding: 0 15px;
+  color: #333;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.google-login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.google-login-note {
+  color: #666;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.error {
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 12px;
+  background-color: #333;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border-left: 4px solid #ff6b00;
+}
+
+.message {
+  color: #fff;
+  text-align: center;
+  margin: 20px 0;
+  padding: 12px;
+  background-color: #333;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border-left: 4px solid #ff6b00;
+}
+
+.auth-page p {
+  text-align: center;
+  color: #666;
+  margin-top: 25px;
+  font-size: 0.95rem;
+}
+
+.auth-page a {
+  color: #ff6b00;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.auth-page a:hover {
+  color: #ff8533;
+  text-decoration: underline;
+}
+
+/* Verification step styles */
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.step {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #333;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+  font-weight: 600;
+}
+
+.step.active {
+  background-color: #ff6b00;
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .auth-page {
+    margin: 20px;
+    padding: 30px 20px;
   }
-  
+
   .auth-page h2 {
-    text-align: center;
-    margin-bottom: 1rem;
+    font-size: 1.8rem;
   }
-  
-  .auth-page form div {
-    margin-bottom: 1rem;
+
+  .auth-page button[type="submit"] {
+    padding: 12px;
   }
-  
-  .auth-page label {
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-  
-  .auth-page input {
-    width: 100%;
-    padding: 0.5rem;
-    box-sizing: border-box;
-  }
-  
-  .auth-page button {
-    width: 100%;
-    padding: 0.5rem;
-    background-color: #333;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .auth-page .error {
-    color: red;
-    text-align: center;
-  }
-  
-  .auth-page .message {
-    color: green;
-    text-align: center;
-    margin-top: 1rem;
-  }
-  
+}

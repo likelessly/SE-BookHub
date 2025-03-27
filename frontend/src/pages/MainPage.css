@@ -21,7 +21,13 @@
 
 /* Sidebar */
 .sidebar {
-  width: 250px;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-width: 250px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
   transition: width 0.3s;
 }
 
@@ -48,6 +54,38 @@
   align-items: center;
   gap: 10px;
   margin: 5px 0;
+  position: relative;
+}
+
+.tag-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.tag-checkbox:hover {
+  background-color: #f5f5f5;
+}
+
+.tag-checkbox input[type="checkbox"] {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.tag-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.tag-count {
+  background-color: #e0e0e0;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #666;
 }
 
 /* Main Content */
@@ -182,9 +220,8 @@
 .book-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
-  min-height: 28px;
+  gap: 4px;
+  margin: 8px 0;
 }
 
 .tag-pill {
@@ -193,10 +230,13 @@
   font-size: 12px;
   padding: 4px 8px;
   border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  margin: 2px;
 }
 
 .no-tags {
-  color: #9e9e9e;
+  color: #999;
   font-style: italic;
   font-size: 12px;
 }
@@ -303,4 +343,59 @@
 
 .no-results button:hover {
   background-color: #e0e0e0;
+}
+
+/* Tag Sidebar Styles */
+.tag-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.clear-tags {
+  background: none;
+  border: none;
+  color: #f44336;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.clear-tags:hover {
+  background-color: #ffebee;
+}
+
+.tags-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Selected Tag Pills */
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .content-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-height: none;
+    margin-bottom: 20px;
+  }
+
+  .tags-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
 }
