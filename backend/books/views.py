@@ -36,7 +36,7 @@ class BorrowBookView(APIView):
 
     def post(self, request):
         user = request.user
-        if user.profile.user_type != 'reader':
+        if hasattr(user, 'profile') and user.profile.user_type != 'reader':
             return Response({"error": "Only readers can borrow books."},
                             status=status.HTTP_403_FORBIDDEN)
         book_id = request.data.get('book_id')
@@ -88,7 +88,7 @@ class ReaderAccountView(APIView):
 
     def get(self, request):
         user = request.user
-        if user.profile.user_type != 'reader':
+        if hasattr(user, 'profile') and user.profile.user_type != 'reader':
             return Response({"error": "Not authorized."},
                             status=status.HTTP_403_FORBIDDEN)
         borrowed = BookBorrow.objects.filter(reader=user)
