@@ -24,19 +24,22 @@ class Profile(models.Model):
         """Generate a random 6-digit verification code"""
         return str(random.randint(100000, 999999))
 
-# Signal to create a profile when a user is created - with duplicate prevention
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        # Use get_or_create to prevent duplicates
-        Profile.objects.get_or_create(user=instance, defaults={'user_type': 'reader'})
+    # Signal to create a profile when a user is created - with duplicate prevention
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            # Skip profile creation for users being registered through the publisher signup flow
+            # This relies on a temporary attribute set during publisher signup
+            if not hasattr(instance, '_skip_profile_creation'):
+                # Use get_or_create to prevent duplicates
+                Profile.objects.get_or_create(user=instance, defaults={'user_type': 'reader'})
 
-# Signal to save the profile when user is saved - with safety check
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    # Check if user has a profile
-    try:
-        instance.profile.save()
-    except User.profile.RelatedObjectDoesNotExist:
-        # If no profile exists, create one
-        Profile.objects.create(user=instance, user_type='reader')
+    # Signal to save the profile when user is saved - with safety check
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, **kwargs):
+        # Check if user has a profile
+        try:
+            instance.profile.save()
+        except User.profile.RelatedObjectDoesNotExist:
+            # If no profile exists, create one
+            Profile.objects.create(user=instance, user_type='reader')
