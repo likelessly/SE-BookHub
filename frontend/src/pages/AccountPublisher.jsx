@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './Account.css';
 import { useNavigate } from 'react-router-dom';
+import { uploadImage, uploadPDF } from '../api';
 
 const AccountPublisher = () => {
   const [accountData, setAccountData] = useState(null);
@@ -51,51 +52,68 @@ const AccountPublisher = () => {
       });
   };
 
-  const handleAddBookSubmit = (e) => {
+  const handleAddBookSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append('title', newBook.title);
-    formData.append('description', newBook.description);
-    formData.append('lending_period', newBook.lending_period);
-    formData.append('max_borrowers', newBook.max_borrowers);
-    formData.append('selectedTags', JSON.stringify(newBook.selectedTags));
-    if (newBook.custom_tag) formData.append('custom_tag', newBook.custom_tag);
-
-    if (newBook.cover_image) {
-      formData.append('cover_image', newBook.cover_image, newBook.cover_image.name);
-    }
-    if (newBook.pdf_file) {
-      formData.append('pdf_file', newBook.pdf_file, newBook.pdf_file.name);
-    }
-
-    axios
-      .post('http://127.0.0.1:8000/api/books/add/', formData, {
+    try {
+      let coverImageUrl = null;
+      let pdfFileUrl = null;
+  
+      // อัปโหลดรูปภาพ
+      if (newBook.cover_image instanceof File) {
+        coverImageUrl = await uploadImage(newBook.cover_image);
+      }
+  
+      // อัปโหลด PDF
+      if (newBook.pdf_file instanceof File) {
+        pdfFileUrl = await uploadPDF(newBook.pdf_file);
+      }
+  
+      const formData = new FormData();
+      formData.append('title', newBook.title);
+      formData.append('description', newBook.description);
+      formData.append('lending_period', newBook.lending_period);
+      formData.append('max_borrowers', newBook.max_borrowers);
+      formData.append('selectedTags', JSON.stringify(newBook.selectedTags));
+      
+      if (coverImageUrl) {
+        formData.append('cover_image', coverImageUrl);
+      }
+      
+      if (pdfFileUrl) {
+        formData.append('pdf_file', pdfFileUrl);
+      }
+      
+      if (newBook.custom_tag) {
+        formData.append('custom_tag', newBook.custom_tag);
+      }
+  
+      const response = await axios.post('http://127.0.0.1:8000/api/books/add/', formData, {
         headers: {
           Authorization: `Token ${localStorage.getItem('token')}`,
           'Content-Type': 'multipart/form-data',
         },
-      })
-      .then(response => {
-        setAccountData(prev => ({
-          ...prev,
-          published_books: [...prev.published_books, response.data]
-        }));
-        setShowAddBookModal(false);
-        setNewBook({
-          title: '',
-          description: '',
-          lending_period: 14,
-          max_borrowers: 1,
-          cover_image: null,
-          pdf_file: null,
-          selectedTags: [],
-          custom_tag: '',
-        });
-      })
-      .catch(err => {
-        console.error("Error adding book:", err.response?.data);
-        alert('Failed to add book.');
       });
+  
+      setAccountData(prev => ({
+        ...prev,
+        published_books: [...prev.published_books, response.data]
+      }));
+      
+      setShowAddBookModal(false);
+      setNewBook({
+        title: '',
+        description: '',
+        lending_period: 14,
+        max_borrowers: 1,
+        cover_image: null,
+        pdf_file: null,
+        selectedTags: [],
+        custom_tag: '',
+      });
+    } catch (err) {
+      console.error("Error adding book:", err);
+      alert('Failed to add book. Please try again.');
+    }
   };
 
   const fetchAvailableTags = () => {
@@ -127,6 +145,34 @@ const AccountPublisher = () => {
     setNewBook({ ...newBook, selectedTags: updatedTags });
   };
 
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file (PNG, JPEG)');
+        return;
+      }
+      setNewBook(prev => ({
+        ...prev,
+        cover_image: file  // เก็บไฟล์ไว้ใน state
+      }));
+    }
+  };
+
+  const handlePDFUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        alert('Please upload a PDF file');
+        return;
+      }
+      setNewBook(prev => ({
+        ...prev,
+        pdf_file: file  // เก็บไฟล์ไว้ใน state
+      }));
+    }
+  };
+
   if (error) return <p>{error}</p>;
   if (!accountData) return <p>Loading...</p>;
 
@@ -154,12 +200,14 @@ const AccountPublisher = () => {
             <div key={book.id} className="book-item">
               {console.log("book.cover_image:", book.cover_image)}
               <img
-                src={`${book.cover_image}`}
+                src={book.cover_image}
                 alt={book.title}
                 onError={(e) => {
+                  console.error('Error loading image:', book.cover_image);
                   e.target.onerror = null;
                   e.target.src = "/cover_default.jpg";
                 }}
+                style={{ maxWidth: '200px', height: 'auto', objectFit: 'cover' }}
               />
               <div className="book-info">
                 <h4>{book.title}</h4>
@@ -234,18 +282,20 @@ const AccountPublisher = () => {
                 />
               </div>
               <div>
-                <label>เพิ่มรูป:</label>
+                <label>Upload Image:</label>
                 <input
                   type="file"
-                  onChange={(e) => setNewBook({ ...newBook, cover_image: e.target.files[0] })}
+                  accept="image/*"
+                  onChange={handleImageUpload}
                   required
                 />
               </div>
               <div>
-                <label>เพิ่ม PDF:</label>
+                <label>Upload PDF:</label>
                 <input
                   type="file"
-                  onChange={(e) => setNewBook({ ...newBook, pdf_file: e.target.files[0] })}
+                  accept="application/pdf"
+                  onChange={handlePDFUpload}
                 />
               </div>
               <div className="modal-actions">
