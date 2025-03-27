@@ -154,8 +154,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # เพิ่มการตั้งค่า Storage ของ S3 (สำหรับ Supabase)
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-AWS_ACCESS_KEY_ID = 'c49a8e18bc3c5e77af94d2ca2c0a15a3'
-AWS_SECRET_ACCESS_KEY = 'a2f4b00062bae252566a0283ec7820295e142307dcaf3a3f2b21056c9dcb7067'
+AWS_ACCESS_KEY_ID = 'e55e34ab18f699f3b7257d8a42427570'
+AWS_SECRET_ACCESS_KEY = '25a0ed27e993dbaa76412bd4fa6338201a946e4ed115212ddc6179bfb16a8965'
 AWS_STORAGE_BUCKET_NAME = 'Bookhub_media'  # Default bucket name
 AWS_STORAGE_BUCKET_NAME_MEDIA = 'Bookhub_media'
 AWS_STORAGE_BUCKET_NAME_PDF = 'Bookhub_pdf'
