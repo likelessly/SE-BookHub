@@ -43,7 +43,7 @@
   }
   
   .book-item img {
-    width: 100px;
+    width: 200px;
     height: 150px;
     object-fit: cover;
   }
