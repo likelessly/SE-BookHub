@@ -15,7 +15,7 @@ const AccountPublisher = () => {
     description: '',
     lending_period: 14,
     max_borrowers: 1,
-    cover_image: null,
+    cover_image: '',
     pdf_file: null,
     selectedTags: [],
     custom_tag: '',
@@ -55,69 +55,81 @@ const AccountPublisher = () => {
   const handleAddBookSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Create a proper FormData object
+      let coverImageUrl = null;
+      // let pdfFileUrl = null;
+
+      // อัปโหลดรูปภาพ
+      if (newBook.cover_image instanceof File) {
+        coverImageUrl = await uploadImage(newBook.cover_image);
+        console.log("coverImageUrl:", coverImageUrl);
+      }
+
+      // อัปโหลด PDF
+      // if (newBook.pdf_file instanceof File) {
+      //   pdfFileUrl = await uploadPDF(newBook.pdf_file);
+      //   console.log("pdfFileUrl:", pdfFileUrl);
+      // }
+
       const formData = new FormData();
-      
-      // Add basic book information
+
+
       formData.append('title', newBook.title);
       formData.append('description', newBook.description);
       formData.append('lending_period', newBook.lending_period);
       formData.append('max_borrowers', newBook.max_borrowers);
-      
-      // Handle file uploads directly in FormData
-      if (newBook.cover_image instanceof File) {
-        formData.append('cover_image', newBook.cover_image);
+      formData.append('selectedTags', JSON.stringify(newBook.selectedTags));
+
+      if (coverImageUrl) {
+        formData.append('cover_image', coverImageUrl);
       }
       
       if (newBook.pdf_file instanceof File) {
         formData.append('pdf_file', newBook.pdf_file);
       }
-      
-      // Handle tags properly - backend might expect a string of comma-separated tags
+
       if (newBook.selectedTags.length > 0) {
         formData.append('tags', newBook.selectedTags.join(','));
       }
-      
-      // Add custom tag if provided
+
+
+
+
+
       if (newBook.custom_tag) {
         formData.append('custom_tag', newBook.custom_tag);
       }
 
-      console.log("Sending form data to server:", Object.fromEntries(formData));
-      
-      // Send the request with proper content type
-      const response = await axios.post(
-        'http://127.0.0.1:8000/api/books/add/', 
-        formData, 
-        {
-          headers: {
-            'Authorization': `Token ${localStorage.getItem('token')}`,
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
+      const response = await axios.post('http://127.0.0.1:8000/api/books/add/', formData, {
+        headers: {
+          Authorization: `Token ${localStorage.getItem('token')}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      // Update the UI with the new book
+
+
+
+
+
+
+
+
       setAccountData(prev => ({
         ...prev,
         published_books: [...prev.published_books, response.data]
       }));
-      
-      // Reset form and close modal
+
+
       setShowAddBookModal(false);
       setNewBook({
         title: '',
         description: '',
         lending_period: 14,
-        max_borrowers: 1,
-        cover_image: null,
-        pdf_file: null,
-        selectedTags: [],
         custom_tag: '',
       });
     } catch (err) {
-      console.error("Error adding book:", err.response?.data || err.message);
-      alert(`Failed to add book: ${err.response?.data?.error || 'Please check your inputs and try again.'}`);
+      console.error("Error adding book:", err);
+      alert('Failed to add book. Please try again.');
     }
   };
 

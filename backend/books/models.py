@@ -16,7 +16,7 @@ class Book(models.Model):
     )
     title = models.CharField(max_length=200)
     description = models.TextField()
-    cover_image = models.ImageField(storage=PublicMediaStorage(), upload_to='')
+    cover_image = models.URLField(max_length=200, blank=True, null=True)  # เพิ่ม field นี้
     pdf_file = models.FileField(storage=PrivateMediaStorage(), upload_to='', blank=True, null=True)
     lending_period = models.PositiveIntegerField(default=14)  # จำนวนวันให้ยืม
     max_borrowers = models.PositiveIntegerField(default=1)    # จำนวนคนที่สามารถยืมได้พร้อมกัน

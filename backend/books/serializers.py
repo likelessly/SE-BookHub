@@ -17,7 +17,7 @@ class BookSerializer(serializers.ModelSerializer):
         child=serializers.CharField(), write_only=True, required=False
     )
     publisher_name = serializers.SerializerMethodField()
-    cover_image = serializers.ImageField(required=False)  # เพิ่ม field นี้
+    cover_image = serializers.URLField(max_length=200, min_length=None, allow_blank=False)  # เพิ่ม field นี้
 
     class Meta:
         model = Book
