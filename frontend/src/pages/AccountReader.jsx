@@ -128,50 +128,63 @@ const AccountReader = () => {
       <div className="account-right">
         <h3>Borrowed Books</h3>
         {accountData.borrowed_books.length > 0 ? (
-          <div className="borrowed-books-grid">
-            {accountData.borrowed_books.map(borrow => (
-              <div key={borrow.id} className="book-item">
-                <div className="book-cover">
-                  <img
-                    src={`${borrow.book.cover_image}`}
-                    alt={borrow.book.title}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "/cover_default.jpg";
-                    }}
-                  />
-                </div>
-                <div className="book-info">
-                  <h4>{borrow.book.title}</h4>
-                  <p className="due-date">
-                    <span>Due Date:</span> {new Date(borrow.due_date).toLocaleDateString()}
-                  </p>
-                  <div className="book-actions">
-                    <button 
-                      className="read-button" 
-                      onClick={() => navigate(`/read/${borrow.id}`)}
-                    >
-                      Read Book
-                    </button>
-                    <button 
-                      className={`return-button ${returnLoading && returningBookId === borrow.id ? 'loading' : ''}`}
-                      onClick={() => handleReturn(borrow.id, borrow.book.title)}
-                      disabled={returnLoading}
-                    >
-                      {returnLoading && returningBookId === borrow.id ? (
-                        <>
-                          <span className="button-loader"></span>
-                          <span>Returning...</span>
-                        </>
-                      ) : 'Return Book'}
-                    </button>
+          <div className="borrowed-books-container">
+            <div className="borrowed-books-grid">
+              {accountData.borrowed_books.map(borrow => (
+                <div key={borrow.id} className="book-card">
+                  <div className="book-cover">
+                    <img
+                      src={borrow.book.cover_image}
+                      alt={borrow.book.title}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/cover_default.jpg";
+                      }}
+                    />
+                    <div className="due-date-badge">
+                      <span className="due-label">Due</span>
+                      <span className="due-value">{new Date(borrow.due_date).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <div className="book-info">
+                    <h4 title={borrow.book.title}>{borrow.book.title}</h4>
+                    <div className="book-tags">
+                      {borrow.book.tags && borrow.book.tags.length > 0 ? 
+                        borrow.book.tags.map((tag, index) => (
+                          <span key={index} className="tag-pill">{tag}</span>
+                        )) : 
+                        <span className="no-tags">No Tags</span>
+                      }
+                    </div>
+                    <p className="publisher"><span>Publisher:</span> {borrow.book.publisher_name}</p>
+                    <div className="book-actions">
+                      <button 
+                        className="read-button" 
+                        onClick={() => navigate(`/read/${borrow.id}`)}
+                      >
+                        Read Book
+                      </button>
+                      <button 
+                        className={`return-button ${returnLoading && returningBookId === borrow.id ? 'loading' : ''}`}
+                        onClick={() => handleReturn(borrow.id, borrow.book.title)}
+                        disabled={returnLoading}
+                      >
+                        {returnLoading && returningBookId === borrow.id ? (
+                          <>
+                            <span className="button-loader"></span>
+                            <span>Returning...</span>
+                          </>
+                        ) : 'Return Book'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         ) : (
           <div className="no-books-message">
+            <img src="/no-books.svg" alt="No borrowed books" />
             <p>You haven't borrowed any books yet.</p>
             <button onClick={() => navigate('/')}>Browse Books</button>
           </div>

@@ -45,7 +45,7 @@
   .book-item img {
     width: 200px;
     height: 150px;
-    object-fit: cover;
+    object-fit: contain;
   }
   
   .book-info {
@@ -74,4 +74,236 @@
     border-radius: 4px;
     width: 400px;
   }
+
+/* Borrowed Books Grid Layout */
+.borrowed-books-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.borrowed-books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.book-card {
+  background-color: #141414;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.book-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.book-cover {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+.book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.book-card:hover .book-cover img {
+  transform: scale(1.05);
+}
+
+.due-date-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.due-label {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.due-value {
+  font-weight: bold;
+}
+
+.book-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.book-info h4 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  line-height: 1.3;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  height: 46px;
+}
+
+.book-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  min-height: 28px;
+}
+
+.tag-pill {
+  background-color: #1976d2;
+  color: white;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+.no-tags {
+  color: #aaa;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.publisher {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #bbb;
+}
+
+.publisher span {
+  font-weight: 500;
+  color: #ddd;
+}
+
+.book-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.read-button, .return-button {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.read-button {
+  background-color: #000000;
+  color: white;
+}
+
+.read-button:hover {
+  background-color: #1565c0;
+}
+
+.return-button {
+  background-color: #2e7d32;
+  color: white;
+}
+
+.return-button:hover:not(:disabled) {
+  background-color: #1b5e20;
+}
+
+.return-button.loading {
+  background-color: #1b5e20;
+  cursor: wait;
+}
+
+.button-loader {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.no-books-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.no-books-message img {
+  width: 120px;
+  opacity: 0.7;
+  margin-bottom: 20px;
+}
+
+.no-books-message p {
+  margin-bottom: 20px;
+  color: #bbb;
+  font-size: 18px;
+}
+
+.no-books-message button {
+  padding: 12px 24px;
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.no-books-message button:hover {
+  background-color: #1565c0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .borrowed-books-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .borrowed-books-grid {
+    grid-template-columns: 1fr;
+  }
   
+  .book-card {
+    max-width: 100%;
+  }
+}
