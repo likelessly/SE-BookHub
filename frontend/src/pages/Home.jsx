@@ -40,6 +40,14 @@ const Home = () => {
       }}
     >
       {/* Header */}
+      <section className="featured-books">
+        <h2>Featured Books</h2>
+        <div className="book-list">
+          <div className="book-card">📖 Book 1</div>
+          <div className="book-card">📖 Book 2</div>
+          <div className="book-card">📖 Book 3</div>
+        </div>
+      </section>
 
       {/* Main Content */}
       <main className="main-content">
@@ -47,7 +55,7 @@ const Home = () => {
         <h2>แพลตฟอร์มสำหรับนักอ่านที่ต้องการค้นหาและแบ่งปันหนังสือดี ๆ</h2>
         <Link to="/main" className="cta-button">Let's Explore Books!</Link>
       </main>
-
+      
       {/* Footer */}
       <footer className="footer">
         <p>© 2025 BookHub. All rights reserved.</p>
