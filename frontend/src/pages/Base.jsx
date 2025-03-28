@@ -65,7 +65,7 @@ const Base = ({ children }) => {
       >
         <div className="navbar-left">
           <a href="#" onClick={handleLogoClick} className="logo-link flex items-center">
-            <img src="/Bookhub.jpg" alt="BookHub Logo" className="logo w-12 h-12 mr-2 rounded-full shadow-lg" />
+            <img src="/Bookhub.png" alt="BookHub Logo" className="logo w-12 h-12 mr-2 rounded-full shadow-lg" />
           </a>
         </div>
         <div className="navbar-right flex gap-4">

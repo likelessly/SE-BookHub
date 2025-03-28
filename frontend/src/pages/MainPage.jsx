@@ -5,11 +5,13 @@ import './MainPage.css';
 
 const MainPage = () => {
   const [books, setBooks] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [tags, setTags] = useState([]);
   const [user, setUser] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [isTagOpen, setIsTagOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -75,11 +77,24 @@ const MainPage = () => {
   // ฟังก์ชันกรองหนังสือตาม search query และ selected tags
   const filteredBooks = books.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTags = selectedTags.length === 0 ||
-      (Array.isArray(book.tags) ? selectedTags.some(tag => book.tags.includes(tag)) : book.tags && typeof book.tags === 'string' ? book.tags.split(',').some(tag => selectedTags.includes(tag)) : false);
+    const matchesTags = selectedTags.length === 0 || 
+      (book.tags && selectedTags.every(tag => book.tags.includes(tag)));
     return matchesSearch && matchesTags;
   });
 
+  // Add tag management functions
+  const handleTagSelect = (tagName) => {
+    setSelectedTags(prev => 
+      prev.includes(tagName) 
+        ? prev.filter(t => t !== tagName)
+        : [...prev, tagName]
+    );
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedTags([]);
+  };
 
   return (
     <div className="main-page">
@@ -91,24 +106,32 @@ const MainPage = () => {
       <div className="content-container">
         {/* Sidebar สำหรับเลือกแท็ก */}
         <div className="sidebar">
-          <h3>Filter by Tags</h3>
-          {tags.map(tag => (
-            <div key={tag.id} className="tag-option">
-              <input
-                type="checkbox"
-                value={tag.name}
-                checked={selectedTags.includes(tag.name)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedTags(prev => [...prev, tag.name]);
-                  } else {
-                    setSelectedTags(prev => prev.filter(t => t !== tag.name));
-                  }
-                }}
-              />
-              <span>{tag.name}</span>
-            </div>
-          ))}
+          <div className="tag-header">
+            <h3>Filter by Tags</h3>
+            {selectedTags.length > 0 && (
+              <button onClick={clearFilters} className="clear-tags">
+                Clear All
+              </button>
+            )}
+          </div>
+          <div className="tags-container">
+            {tags.map(tag => (
+              <div key={tag.id} className="tag-option">
+                <label className="tag-checkbox">
+                  <input
+                    type="checkbox"
+                    value={tag.name}
+                    checked={selectedTags.includes(tag.name)}
+                    onChange={() => handleTagSelect(tag.name)}
+                  />
+                  <span className="tag-name">{tag.name}</span>
+                  <span className="tag-count">
+                    {books.filter(book => book.tags?.includes(tag.name)).length}
+                  </span>
+                </label>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* ส่วนหลักของหน้าที่แสดงหนังสือ */}
@@ -125,19 +148,54 @@ const MainPage = () => {
 
           {/* รายการหนังสือ */}
           <div className="book-list">
-            {filteredBooks.length > 0 ? (
-              filteredBooks.map(book => (
-                <div key={book.id} className="book-item">
-                  <img src={book.cover_image} alt={book.title} />
-                  <h3>{book.title}</h3>
-                  <p>Tags: {book.tags ? book.tags.join(', ') : 'No Tags'}</p>
-                  <p>Publisher: {book.publisher_name}</p>
-                  <p>Remaining Borrows: {book.remaining_borrows}</p>
-                  <Link to={`/books/${book.id}`}>Details</Link>
-                </div>
-              ))
+            {loading ? (
+              <div className="loading-container">
+                <div className="loading-spinner"></div>
+                <p>Loading books...</p>
+              </div>
+            ) : filteredBooks.length > 0 ? (
+              <div className="books-grid">
+                {filteredBooks.map(book => (
+                  <div key={book.id} className="book-card">
+                    <div className="book-cover">
+                      <img
+                        src={`${book.cover_image}`}
+                        alt={book.title}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = "/cover_default.jpg";
+                        }}
+                      />
+                      {book.remaining_borrows === 0 && (
+                        <div className="unavailable-overlay">
+                          <span>Currently Unavailable</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="book-info">
+                      <h3 title={book.title}>{book.title}</h3>
+                      <div className="book-tags">
+                        {book.tags && book.tags.length > 0 ? book.tags.map((tag, index) => (
+                          <span key={index} className="tag-pill">{tag}</span>
+                        )) : <span className="no-tags">No Tags</span>}
+                      </div>
+                      <p className="publisher"><span>Publisher:</span> {book.publisher_name}</p>
+                      <div className="book-status">
+                        <span className={`availability ${book.remaining_borrows > 0 ? 'available' : 'unavailable'}`}>
+                          {book.remaining_borrows > 0 ? `${book.remaining_borrows} Available` : 'Unavailable'}
+                        </span>
+                        <Link to={`/books/${book.id}`} className="details-button">View Details</Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <p>No books available.</p>
+              <div className="no-results">
+                <img src="/no-result.png" alt="No books found" />
+                <p>No books match your search criteria.</p>
+                <button onClick={() => {setSearchQuery(''); setSelectedTags([]);}}>Clear Filters</button>
+              </div>
             )}
           </div>
         </div>

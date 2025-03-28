@@ -13,6 +13,7 @@ import AccountPublisher from './pages/AccountPublisher';
 import ReadBookWrapper from './pages/ReadBookWrapper';
 import MainPage from './pages/MainPage';
 import BookDetail from './pages/BookDetail';
+import EditBook from './pages/EditBook';
 
 // Replace this with your Google Client ID
 const GOOGLE_CLIENT_ID = "922387380789-081ufgcic0l05iivp0lnqqu694cs6sbl.apps.googleusercontent.com";
@@ -34,6 +35,7 @@ function App() {
             <Route path="/read/:borrowId" element={<ReadBookWrapper />} />
             <Route path="/books/:bookId" element={<BookDetail />} />
             <Route path="/books/:bookId/borrow" element={<BookDetail />} />
+            <Route path="/edit-book/:bookId" element={<EditBook />} />
           </Routes>
         </Base>
       </Router>

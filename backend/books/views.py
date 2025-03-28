@@ -54,15 +54,39 @@ class ReturnBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, borrow_id):
-        user = request.user
-        borrow_entry = get_object_or_404(BookBorrow, id=borrow_id, reader=user)
-        book = borrow_entry.book
-        book.borrow_count -= 1
-        book.save()
-        borrow_entry.returned_at = timezone.now() # บันทึกวันที่คืนหนังสือ
-        borrow_entry.save()
-        return Response({"message": "Book returned successfully."},
-                        status=status.HTTP_200_OK)
+        try:
+            # Find the borrow record and verify ownership
+            borrow = BookBorrow.objects.select_related('book').get(
+                id=borrow_id,
+                user=request.user,
+                is_returned=False
+            )
+            
+            # Mark as returned
+            borrow.is_returned = True
+            borrow.return_date = timezone.now()
+            borrow.save()
+
+            # Log the return
+            print(f"Book returned: Borrow ID {borrow_id} by user {request.user.id}")
+
+            return Response({
+                "status": "success",
+                "message": "Book returned successfully"
+            })
+
+        except BookBorrow.DoesNotExist:
+            return Response({
+                "status": "error",
+                "message": "Borrow record not found or already returned"
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            print(f"Error returning book: {str(e)}")
+            return Response({
+                "status": "error",
+                "message": "Failed to return book"
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class AddBookView(generics.CreateAPIView):
     queryset = Book.objects.all()
@@ -146,3 +170,29 @@ class ReadBookView(APIView):
         response = FileResponse(book.pdf_file.open('rb'), content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="{}"'.format(book.pdf_file.name)
         return response
+
+class EditBookView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, book_id):
+        try:
+            # Get book and verify ownership
+            book = Book.objects.get(id=book_id, publisher=request.user)
+            
+            # Update book with partial data
+            serializer = BookSerializer(
+                book,
+                data=request.data,
+                partial=True  # Allow partial updates
+            )
+            
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Book.DoesNotExist:
+            return Response(
+                {"detail": "Book not found or you don't have permission to edit it"},
+                status=status.HTTP_404_NOT_FOUND
+            )
