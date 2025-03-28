@@ -55,33 +55,38 @@ class ReturnBookView(APIView):
 
     def post(self, request, borrow_id):
         try:
-            # Fetch the borrow record
+            # Find the borrow record and verify ownership
             borrow = BookBorrow.objects.select_related('book').get(
                 id=borrow_id,
-                reader=request.user,
-                returned_at__isnull=True  # Ensure the book hasn't already been returned
+                user=request.user,
+                is_returned=False
             )
-
-            # Mark the book as returned
-            borrow.returned_at = timezone.now()
+            
+            # Mark as returned
+            borrow.is_returned = True
+            borrow.return_date = timezone.now()
             borrow.save()
 
-            # Update the book's borrow count
-            book = borrow.book
-            if book.borrow_count > 0:
-                book.borrow_count -= 1
-                book.save()
+            # Log the return
+            print(f"Book returned: Borrow ID {borrow_id} by user {request.user.id}")
 
             return Response({
-                'status': 'success',
-                'message': 'Book returned successfully'
-            }, status=status.HTTP_200_OK)
+                "status": "success",
+                "message": "Book returned successfully"
+            })
 
         except BookBorrow.DoesNotExist:
             return Response({
-                'status': 'error',
-                'message': 'Borrow record not found or already returned'
+                "status": "error",
+                "message": "Borrow record not found or already returned"
             }, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            print(f"Error returning book: {str(e)}")
+            return Response({
+                "status": "error",
+                "message": "Failed to return book"
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class AddBookView(generics.CreateAPIView):
     queryset = Book.objects.all()
