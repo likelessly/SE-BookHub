@@ -3,7 +3,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: #333 !important;
+    background: #101010 !important;
     padding: 15px 30px !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
