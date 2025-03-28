@@ -1,19 +1,17 @@
 .edit-book-page {
   max-width: 800px;
-  margin: 20px auto;
+  margin: 40px auto;
   padding: 30px;
-  background-color: #fff;
+  background-color: white;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .edit-book-page h2 {
   color: #ff6b00;
+  text-align: center;
   font-size: 2rem;
   margin-bottom: 30px;
-  text-align: center;
-  text-transform: uppercase;
-  font-weight: bold;
 }
 
 .form-group {
@@ -23,9 +21,8 @@
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 600;
   color: #333;
-  font-size: 1rem;
+  font-weight: 600;
 }
 
 .form-group input[type="text"],
@@ -36,15 +33,14 @@
   border: 2px solid #ddd;
   border-radius: 8px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  color: #333;
+  background-color: white;
 }
 
-.form-group input[type="text"]:focus,
-.form-group input[type="number"]:focus,
+.form-group input:focus,
 .form-group textarea:focus {
   border-color: #ff6b00;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.1);
 }
 
 .form-group textarea {
@@ -66,8 +62,8 @@
 }
 
 .current-pdf {
-  margin-top: 8px;
   color: #666;
+  margin-top: 8px;
   font-style: italic;
   padding: 8px;
   background-color: #f8f8f8;
@@ -77,8 +73,8 @@
 .form-actions {
   display: flex;
   gap: 15px;
-  margin-top: 30px;
   justify-content: flex-end;
+  margin-top: 30px;
 }
 
 .save-button,
@@ -88,7 +84,6 @@
   border-radius: 6px;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
   font-weight: 600;
 }
 
@@ -112,19 +107,19 @@
   transform: translateY(-2px);
 }
 
-.loading,
-.error {
+.loading {
   text-align: center;
   padding: 40px;
-  font-size: 1.2rem;
-}
-
-.loading {
   color: #333;
 }
 
 .error {
   color: #ff6b00;
+  text-align: center;
+  padding: 40px;
+  background-color: #333;
+  border-radius: 8px;
+  margin: 20px 0;
 }
 
 .tag-section {
@@ -147,7 +142,6 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
 .show-tags-button:hover {
@@ -165,6 +159,8 @@
   padding: 10px;
   border: 2px solid #ddd;
   border-radius: 6px;
+  color: #333;
+  background-color: white;
 }
 
 .custom-tag-input button {
@@ -174,7 +170,6 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
 .custom-tag-input button:hover {
@@ -194,7 +189,7 @@
   gap: 8px;
   padding: 8px 12px;
   background-color: #333;
-  color: white;
+  color: #ff6b00;
   border-radius: 20px;
   font-size: 0.9rem;
 }
@@ -239,7 +234,7 @@
 }
 
 .modal-content h3 {
-  color: #ff6b00;
+  color: #333;
   margin-bottom: 20px;
   font-size: 1.5rem;
 }
@@ -259,7 +254,7 @@
   border: 2px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  color: #333;
 }
 
 .tag-checkbox:hover {
@@ -284,7 +279,6 @@
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .modal-actions button:hover {

@@ -5,11 +5,13 @@ import './MainPage.css';
 
 const MainPage = () => {
   const [books, setBooks] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [tags, setTags] = useState([]);
   const [user, setUser] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [isTagOpen, setIsTagOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -190,7 +192,7 @@ const MainPage = () => {
               </div>
             ) : (
               <div className="no-results">
-                <img src="/no-results.svg" alt="No books found" />
+                <img src="/no-result.png" alt="No books found" />
                 <p>No books match your search criteria.</p>
                 <button onClick={() => {setSearchQuery(''); setSelectedTags([]);}}>Clear Filters</button>
               </div>

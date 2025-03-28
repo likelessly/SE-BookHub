@@ -36,6 +36,7 @@ const AccountReader = () => {
     fetchAccountData();
   }, []);
 
+  // eslint-disable-next-line no-unused-vars
   const showNotification = (type, message) => {
     setNotification({ show: true, type, message });
     setTimeout(() => {
@@ -43,44 +44,56 @@ const AccountReader = () => {
     }, 3000);
   };
 
-  const handleReturn = (borrowId, bookTitle) => {
+  const handleReturn = async (borrowId, bookTitle) => {
+    if (!window.confirm(`คุณต้องการคืนหนังสือ "${bookTitle}" หรือไม่?`)) {
+      return;
+    }
+  
     setReturnLoading(true);
     setReturningBookId(borrowId);
-    
-    // Immediately update UI to remove the book
-    setAccountData(prevData => {
-      if (!prevData) return null;
-      
-      return {
-        ...prevData,
-        user: {
-          ...prevData.user,
-          borrow_count: Math.max(0, prevData.user.borrow_count - 1)
-        },
-        borrowed_books: prevData.borrowed_books.filter(book => book.id !== borrowId)
-      };
-    });
-    
-    axios
-      .post(`http://127.0.0.1:8000/api/books/return/${borrowId}/`, {}, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
-      })
-      .then(response => {
-        // Refresh data from server to ensure everything is in sync
-        fetchAccountData();
-        showNotification('success', `"${bookTitle}" returned successfully!`);
-      })
-      .catch(err => {
-        console.error('Error returning book:', err);
-        showNotification('error', 'Failed to return book. Please try again.');
-        
-        // Revert the optimistic update if there's an error
-        fetchAccountData();
-      })
-      .finally(() => {
-        setReturnLoading(false);
-        setReturningBookId(null);
+  
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `http://127.0.0.1:8000/api/books/return/${borrowId}/`,
+        headers: {
+          'Authorization': `Token ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
       });
+  
+      if (response.data.status === 'success') {
+        // Update local state
+        setAccountData(prev => ({
+          ...prev,
+          borrowed_books: prev.borrowed_books.filter(borrow => borrow.id !== borrowId)
+        }));
+  
+        // Show success message
+        setNotification({
+          show: true,
+          type: 'success',
+          message: `คืนหนังสือ "${bookTitle}" สำเร็จ`
+        });
+      }
+    } catch (error) {
+      console.error('Error returning book:', error.response?.data || error.message);
+      
+      // Show error message
+      setNotification({
+        show: true,
+        type: 'error',
+        message: error.response?.data?.message || 'ไม่สามารถคืนหนังสือได้ กรุณาลองใหม่อีกครั้ง'
+      });
+    } finally {
+      setReturnLoading(false);
+      setReturningBookId(null);
+      
+      // Hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification({ show: false, type: '', message: '' });
+      }, 3000);
+    }
   };
 
   if (error) return (
