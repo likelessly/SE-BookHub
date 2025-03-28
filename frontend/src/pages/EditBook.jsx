@@ -11,6 +11,8 @@ const EditBook = () => {
   const [error, setError] = useState(null);
   const [showTagModal, setShowTagModal] = useState(false);
   const [availableTags, setAvailableTags] = useState([]);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
   const [bookData, setBookData] = useState({
     title: '',
     description: '',
@@ -19,7 +21,6 @@ const EditBook = () => {
     cover_image: '',
     pdf_file: null,
     selectedTags: [],
-    custom_tag: ''
   });
 
   useEffect(() => {
@@ -68,25 +69,6 @@ const EditBook = () => {
     }));
   };
 
-  const handleAddCustomTag = () => {
-    if (!bookData.custom_tag.trim()) {
-      alert('กรุณากรอกชื่อแท็ก');
-      return;
-    }
-
-    const newTag = bookData.custom_tag.trim();
-    if (bookData.selectedTags.includes(newTag)) {
-      alert('แท็กนี้ถูกเลือกไว้แล้ว');
-      return;
-    }
-
-    setBookData(prev => ({
-      ...prev,
-      selectedTags: [...prev.selectedTags, newTag],
-      custom_tag: ''
-    }));
-  };
-
   const handleRemoveTag = (tagName) => {
     setBookData(prev => ({
       ...prev,
@@ -102,31 +84,14 @@ const EditBook = () => {
       let coverImageUrl = bookData.cover_image;
       let pdfFileUrl = bookData.pdf_file;
 
-      // Handle new cover image upload
       if (bookData.new_cover_image instanceof File) {
-        try {
-          coverImageUrl = await uploadImage(bookData.new_cover_image);
-        } catch (error) {
-          console.error('Error uploading cover image:', error);
-          alert('ไม่สามารถอัพโหลดรูปปกได้');
-          setLoading(false);
-          return;
-        }
+        coverImageUrl = await uploadImage(bookData.new_cover_image);
       }
 
-      // Handle new PDF upload
       if (bookData.new_pdf_file instanceof File) {
-        try {
-          pdfFileUrl = await uploadPDF(bookData.new_pdf_file);
-        } catch (error) {
-          console.error('Error uploading PDF:', error);
-          alert('ไม่สามารถอัพโหลดไฟล์ PDF ได้');
-          setLoading(false);
-          return;
-        }
+        pdfFileUrl = await uploadPDF(bookData.new_pdf_file);
       }
 
-      // Prepare update data
       const updateData = {
         title: bookData.title.trim(),
         description: bookData.description.trim(),
@@ -137,30 +102,26 @@ const EditBook = () => {
         ...(pdfFileUrl && { pdf_file: pdfFileUrl })
       };
 
-      // Debug log
-      console.log('Sending update data:', updateData);
-
-      const response = await axios({
-        method: 'put',
-        url: `http://127.0.0.1:8000/api/books/update/${bookId}/`,
-        data: updateData,
-        headers: {
-          'Authorization': `Token ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
+      const response = await axios.put(
+        `http://127.0.0.1:8000/api/books/update/${bookId}/`,
+        updateData,
+        {
+          headers: {
+            'Authorization': `Token ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          }
         }
-      });
+      );
 
       if (response.data) {
-        alert('อัพเดตหนังสือสำเร็จ!');
-        navigate(`/books/${bookId}`);
+        setShowSuccessPopup(true);
+        setTimeout(() => {
+          setShowSuccessPopup(false);
+          navigate(`/books/${bookId}`);
+        }, 2000);
       }
     } catch (err) {
-      console.error('Error updating book:', {
-        response: err.response?.data,
-        status: err.response?.status,
-        message: err.message
-      });
-      
+      console.error('Error updating book:', err);
       const errorMessage = err.response?.data?.detail || 
                           Object.values(err.response?.data || {}).join('\n') ||
                           'ไม่สามารถอัพเดตหนังสือได้';
@@ -246,29 +207,16 @@ const EditBook = () => {
 
         <div className="form-group tag-section">
           <label>แท็ก:</label>
-          <div className="tag-controls">
-            <button 
-              type="button" 
-              className="show-tags-button"
-              onClick={() => {
-                fetchAvailableTags();
-                setShowTagModal(true);
-              }}
-            >
-              เลือกแท็ก
-            </button>
-            <div className="custom-tag-input">
-              <input
-                type="text"
-                value={bookData.custom_tag}
-                onChange={(e) => setBookData({...bookData, custom_tag: e.target.value})}
-                placeholder="เพิ่มแท็กใหม่"
-              />
-              <button type="button" onClick={handleAddCustomTag}>
-                เพิ่มแท็ก
-              </button>
-            </div>
-          </div>
+          <button 
+            type="button" 
+            className="show-tags-button"
+            onClick={() => {
+              fetchAvailableTags();
+              setShowTagModal(true);
+            }}
+          >
+            เลือกแท็ก
+          </button>
 
           <div className="selected-tags">
             {bookData.selectedTags.map((tag, index) => (
@@ -325,6 +273,14 @@ const EditBook = () => {
           </button>
         </div>
       </form>
+
+      {showSuccessPopup && (
+        <div className="success-popup">
+          <div className="success-popup-content">
+            🎉 อัปเดตหนังสือสำเร็จ!
+          </div>
+        </div>
+      )}
     </div>
   );
 };
