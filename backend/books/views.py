@@ -1,3 +1,4 @@
+
 # books/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -55,38 +56,33 @@ class ReturnBookView(APIView):
 
     def post(self, request, borrow_id):
         try:
-            # Find the borrow record and verify ownership
+            # Fetch the borrow record
             borrow = BookBorrow.objects.select_related('book').get(
                 id=borrow_id,
-                user=request.user,
-                is_returned=False
+                reader=request.user,
+                returned_at__isnull=True  # Ensure the book hasn't already been returned
             )
-            
-            # Mark as returned
-            borrow.is_returned = True
-            borrow.return_date = timezone.now()
+
+            # Mark the book as returned
+            borrow.returned_at = timezone.now()
             borrow.save()
 
-            # Log the return
-            print(f"Book returned: Borrow ID {borrow_id} by user {request.user.id}")
+            # Update the book's borrow count
+            book = borrow.book
+            if book.borrow_count > 0:
+                book.borrow_count -= 1
+                book.save()
 
             return Response({
-                "status": "success",
-                "message": "Book returned successfully"
-            })
+                'status': 'success',
+                'message': 'Book returned successfully'
+            }, status=status.HTTP_200_OK)
 
         except BookBorrow.DoesNotExist:
             return Response({
-                "status": "error",
-                "message": "Borrow record not found or already returned"
+                'status': 'error',
+                'message': 'Borrow record not found or already returned'
             }, status=status.HTTP_404_NOT_FOUND)
-        
-        except Exception as e:
-            print(f"Error returning book: {str(e)}")
-            return Response({
-                "status": "error",
-                "message": "Failed to return book"
-            }, status=status.HTTP_400_BAD_REQUEST)
 
 class AddBookView(generics.CreateAPIView):
     queryset = Book.objects.all()

@@ -1,31 +1,44 @@
 // src/pages/ReadBook.jsx
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { supabase } from '../api'; // Ensure this points to your Supabase client
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-const ReadBook = ({ borrowId }) => {
+const ReadBook = ({ filePath }) => {
   const [pdfData, setPdfData] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8000/api/books/read/${borrowId}/`, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
-        responseType: 'arraybuffer', // รับข้อมูลเป็น ArrayBuffer
-      })
-      .then(response => {
-        const pdfArray = new Uint8Array(response.data);
-        setPdfData(pdfArray);
-      })
-      // eslint-disable-next-line no-unused-vars
-      .catch(err => {
-        setError('Unable to load PDF. Borrow period may have expired.');
-      });
-  }, [borrowId]);
+    const fetchSignedUrlAndPdf = async () => {
+      try {
+        // Generate a signed URL for the private file
+        const { data, error } = await supabase.storage
+          .from('Bookhub_pdf') // Replace with your Supabase bucket name
+          .createSignedUrl(filePath, 60 * 60); // Signed URL valid for 1 hour
+
+        if (error) {
+          setError('Failed to generate signed URL.');
+          console.error('Error generating signed URL:', error.message);
+          return;
+        }
+
+        if (data?.signedUrl) {
+          // Fetch the PDF file as an ArrayBuffer
+          const response = await fetch(data.signedUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          setPdfData(new Uint8Array(arrayBuffer)); // Convert to Uint8Array for react-pdf
+        }
+      } catch (err) {
+        setError('Unable to load PDF. Please try again later.');
+        console.error('Error fetching PDF:', err.message);
+      }
+    };
+
+    fetchSignedUrlAndPdf();
+  }, [filePath]);
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
@@ -36,7 +49,7 @@ const ReadBook = ({ borrowId }) => {
 
   return (
     <div
-      onContextMenu={e => e.preventDefault()}
+      onContextMenu={(e) => e.preventDefault()}
       style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none' }}
     >
       <Document file={pdfData} onLoadSuccess={onDocumentLoadSuccess}>
