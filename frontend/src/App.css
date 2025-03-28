@@ -1,0 +1,50 @@
+/* src/pages/Home.css */
+.home-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #f8f8f8;
+}
+
+.logo img {
+  height: 40px; /* ปรับขนาดตามต้องการ */
+}
+
+.nav-buttons a {
+  margin-left: 1rem;
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.main-content h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.main-content p {
+  font-size: 1.2rem;
+  max-width: 600px;
+}
+
+.footer {
+  padding: 1rem 2rem;
+  text-align: center;
+  background-color: #f1f1f1;
+}
