@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './Account.css';
 import { useNavigate } from 'react-router-dom';
-import { uploadImage, uploadPDF } from '../api';
+import { uploadImage} from '../api';
 
 const AccountPublisher = () => {
   const [accountData, setAccountData] = useState(null);

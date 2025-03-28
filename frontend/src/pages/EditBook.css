@@ -298,3 +298,18 @@ input[type="file"] {
 input[type="file"]:hover {
   border-color: #ff6b00;
 }
+.success-popup {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50;
+  color: white;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  z-index: 2000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: fadeSlideDown 0
+}
