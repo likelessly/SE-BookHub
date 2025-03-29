@@ -75,10 +75,10 @@ const Base = ({ children }) => {
                 <Link to="/login" className="nav-link">Login</Link>
               </motion.div>
               <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
-                <Link to="/signup/reader" className="nav-link">Signup as Reader</Link>
+                <Link to="/signup/reader" className="nav-link">Sign up as Reader</Link>
               </motion.div>
               <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
-                <Link to="/signup/publisher" className="nav-link">Signup as Publisher</Link>
+                <Link to="/signup/publisher" className="nav-link">Sign up as Publisher</Link>
               </motion.div>
             </>
           ) : (
