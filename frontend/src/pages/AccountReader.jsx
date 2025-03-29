@@ -176,7 +176,7 @@ const AccountReader = () => {
         <button className="logout-button" onClick={() => {
           localStorage.removeItem('token');
           localStorage.removeItem('role');
-          window.location.href = '/';
+          navigate('/');
         }}>Logout</button>
       </div>
       

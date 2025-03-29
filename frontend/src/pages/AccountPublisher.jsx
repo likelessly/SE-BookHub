@@ -203,7 +203,7 @@ const AccountPublisher = () => {
         <p>Published Books: {accountData.user.book_count}</p>
         <button onClick={() => {
           localStorage.removeItem('token');
-          window.location.href = '/';
+          navigate('/');
         }}>Logout</button>
       </div>
 
