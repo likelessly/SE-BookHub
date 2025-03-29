@@ -620,6 +620,11 @@
   color: white;
 }
 
+.account-badge.publisher {
+  background-color: #ff6b00;
+  color: white;
+}
+
 /* Account Stats */
 .account-stats {
   display: flex;
@@ -682,6 +687,15 @@
 }
 
 .account-button.logout:hover {
+  background-color: #ff8533;
+}
+
+.account-button.primary {
+  background-color: #ff6b00;
+  color: white;
+}
+
+.account-button.primary:hover {
   background-color: #ff8533;
 }
 

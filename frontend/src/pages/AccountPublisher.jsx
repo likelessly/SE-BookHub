@@ -4,6 +4,7 @@ import './Account.css';
 import { useNavigate } from 'react-router-dom';
 import { uploadImage } from '../api';
 import { FaPlus, FaEdit, FaTrash, FaBook, FaTag, FaUpload } from 'react-icons/fa';
+import { BiErrorCircle } from 'react-icons/bi';
 
 const AccountPublisher = () => {
   const [accountData, setAccountData] = useState(null);
@@ -27,8 +28,10 @@ const AccountPublisher = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/login');
+    const role = localStorage.getItem('role');
+    
+    if (!token || role !== 'publisher') {
+      navigate('/login', { state: { from: '/account' } });
       return;
     }
 
@@ -223,6 +226,8 @@ const AccountPublisher = () => {
 
   if (error) return (
     <div className="error-container">
+      <BiErrorCircle size={50} color="#ff6b00" />
+      <h3>Something went wrong</h3>
       <p>{error}</p>
       <button onClick={() => navigate('/')}>Back to Home</button>
     </div>
@@ -237,48 +242,76 @@ const AccountPublisher = () => {
       )}
       
       <div className="account-left">
-        <img 
-          src={accountData.user.profile_image || "/publisher_default.jpg"} 
-          alt="Profile"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/publisher_default.jpg";
-          }}
-        />
-        <h2>{accountData.user.name}</h2>
+        <div className="profile-header">
+          <img 
+            src={accountData.user.profile_image || "/publisher_default.jpg"} 
+            alt="Profile"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/publisher_default.jpg";
+            }}
+          />
+          <h2>{accountData.user.name}</h2>
+          <div className="account-badge publisher">Publisher</div>
+        </div>
         
-        <p>
-          <span>Role:</span>
-          <span>{accountData.user.role}</span>
-        </p>
-        <p>
-          <span>Registered:</span>
-          <span>{new Date(accountData.user.registered_at).toLocaleDateString()}</span>
-        </p>
-        <p>
-          <span>Published Books:</span>
-          <span>{accountData.user.book_count}</span>
-        </p>
+        <div className="account-stats">
+          <div className="stat-item">
+            <div className="stat-label">Joined</div>
+            <div className="stat-value">
+              {new Date(accountData.user.registered_at).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })}
+            </div>
+          </div>
+          
+          <div className="stat-item">
+            <div className="stat-label">Published Books</div>
+            <div className="stat-value">{accountData.user.book_count} books</div>
+          </div>
+          
+          {/* <div className="stat-item">
+            <div className="stat-label">Total Downloads</div>
+            <div className="stat-value">{accountData.user.total_downloads || 0}</div>
+          </div> */}
+        </div>
         
-        <button 
-          className="logout-button" 
-          onClick={() => {
-            localStorage.removeItem('token');
-            localStorage.removeItem('role');
-            navigate('/');
-          }}
-        >
-          Logout
-        </button>
+        <div className="account-actions">
+          <button 
+            className="account-button primary"
+            onClick={() => setShowAddBookModal(true)}
+          >
+            Add New Book
+          </button>
+          <button 
+            className="account-button secondary"
+            onClick={() => navigate('/main')}
+          >
+            Browse Books
+          </button>
+          <button 
+            className="account-button logout"
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('role');
+              navigate('/');
+            }}
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="account-right">
-        <div className="top-controls">
+        <div className="section-header">
           <h3>My Published Books</h3>
-          <button onClick={() => setShowAddBookModal(true)}>
-            <FaPlus />
-            Add New Book
-          </button>
+          {accountData.published_books.length > 0 && (
+            <span className="book-count">
+              {accountData.published_books.length} books
+            </span>
+          )}
         </div>
         
         {accountData.published_books.length > 0 ? (
@@ -297,10 +330,12 @@ const AccountPublisher = () => {
                 </div>
                 <div className="book-info">
                   <h4>{book.title}</h4>
-                  <p className="borrow-count">
-                    <FaBook />
-                    <span>Borrowed:</span> {book.borrow_count} times
-                  </p>
+                  <div className="book-meta">
+                    <p className="borrow-count">
+                      <FaBook />
+                      <span>Borrowed:</span> {book.borrow_count} times
+                    </p>
+                  </div>
                   
                   {book.tags && book.tags.length > 0 && (
                     <div className="book-tags">
@@ -332,7 +367,9 @@ const AccountPublisher = () => {
           </div>
         ) : (
           <div className="no-books-message">
-            <p>You haven't published any books yet.</p>
+            <img src="/empty-publisher.svg" alt="No books" />
+            <h3>You haven't published any books yet</h3>
+            <p>Share your knowledge with the world by publishing your first book.</p>
             <button onClick={() => setShowAddBookModal(true)}>Publish Your First Book</button>
           </div>
         )}
