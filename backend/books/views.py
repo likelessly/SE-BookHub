@@ -241,22 +241,51 @@ class ReadBookView(APIView):
 
 class EditBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]  # Add this line for proper file handling
-    
-    def put(self, request, book_id):
-        # Get the book to update
-        book = get_object_or_404(Book, id=book_id)
-        
-        # Check if user is the publisher
-        if book.publisher != request.user:
-            return Response({"detail": "You are not authorized to update this book."}, 
-                           status=status.HTTP_403_FORBIDDEN)
-        
-        # Extract data from request
-        data = request.data
-        logger.info(f"Received data for book update: {data.keys()}")
-        
+    parser_classes = [MultiPartParser, FormParser]
+
+    def delete_file_from_supabase(self, file_url, bucket_name):
+        """Helper method to delete file from Supabase"""
         try:
+            parsed_url = urlparse(file_url)
+            file_path = parsed_url.path.replace(f"storage/v1/object/public/{bucket_name}/", "")
+            file_path = file_path.lstrip('/')
+            
+            logger.info(f"Attempting to delete file: bucket={bucket_name}, file_path={file_path}")
+            
+            response = supabase.storage.from_(bucket_name).remove([file_path])
+            if isinstance(response, list) and response and "error" in response[0]:
+                logger.error(f"Error deleting file: {response[0]['error']}")
+            else:
+                logger.info(f"File deleted successfully: {file_path}")
+                
+        except Exception as e:
+            logger.error(f"Error deleting file: {e}")
+
+    def put(self, request, book_id):
+        try:
+            # Get the book to update
+            book = get_object_or_404(Book, id=book_id, publisher=request.user)
+            
+            # Extract data from request
+            data = request.data.copy()
+            logger.info(f"Received data for book update: {data.keys()}")
+            
+            # Handle cover image
+            if 'cover_image' in data and data['cover_image']:
+                if isinstance(data['cover_image'], str) and data['cover_image'] != book.cover_image:
+                    # Delete old cover image if exists and different from new one
+                    if book.cover_image:
+                        self.delete_file_from_supabase(book.cover_image, "Bookhub_media")
+                    book.cover_image = data['cover_image']
+            
+            # Handle PDF file
+            if 'pdf_file' in data and data['pdf_file']:
+                if isinstance(data['pdf_file'], str) and data['pdf_file'] != book.pdf_file.url:
+                    # Delete old PDF if exists and different from new one
+                    if book.pdf_file:
+                        self.delete_file_from_supabase(book.pdf_file.url, "Bookhub_pdf")
+                    book.pdf_file = data['pdf_file']
+            
             # Handle text fields
             if 'title' in data:
                 book.title = data['title']
@@ -267,47 +296,17 @@ class EditBookView(APIView):
             if 'max_borrowers' in data and data['max_borrowers']:
                 book.max_borrowers = int(data['max_borrowers'])
             
-            # Handle tags (sent as JSON string)
+            # Handle tags
             if 'tags' in data and data['tags']:
                 try:
                     import json
                     tags_list = json.loads(data['tags'])
-                    # Clear existing tags
                     book.tags.clear()
-                    # Add new tags
                     for tag_name in tags_list:
                         tag, created = Tag.objects.get_or_create(name=tag_name)
                         book.tags.add(tag)
                 except Exception as e:
                     logger.error(f"Error processing tags: {str(e)}")
-            
-            # Handle cover image
-            if 'cover_image' in data and data['cover_image']:
-                # Check if it's a file or URL string
-                if hasattr(data['cover_image'], 'read'):
-                    # It's a file object - handle file upload
-                    logger.info("Handling new cover image upload")
-                    # Your existing cover image upload logic
-                else:
-                    # It's a URL string - just update the field
-                    logger.info("Using existing cover image URL")
-                    book.cover_image = data['cover_image']
-            
-            # Handle PDF file - THIS IS THE KEY PART
-            if 'pdf_file' in data and data['pdf_file']:
-                # Check if it's a file object or string
-                if hasattr(data['pdf_file'], 'read'):
-                    # It's a file object - handle as new upload
-                    logger.info("Handling new PDF file upload")
-                    # Your existing PDF upload logic
-                else:
-                    # It's a string - just update the field if it's a valid path
-                    logger.info("Using existing PDF file path")
-                    book.pdf_file = data['pdf_file']
-            elif 'keep_existing_pdf' in data and data['keep_existing_pdf'] == 'true':
-                # Do nothing - keep the existing PDF
-                logger.info("Keeping existing PDF file")
-                pass
             
             # Save the updated book
             book.save()

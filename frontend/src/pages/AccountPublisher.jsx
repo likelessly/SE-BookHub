@@ -367,7 +367,7 @@ const AccountPublisher = () => {
           </div>
         ) : (
           <div className="no-books-message">
-            <img src="/empty-publisher.svg" alt="No books" />
+            <img src="/no-result.png" alt="No books" />
             <h3>You haven't published any books yet</h3>
             <p>Share your knowledge with the world by publishing your first book.</p>
             <button onClick={() => setShowAddBookModal(true)}>Publish Your First Book</button>
