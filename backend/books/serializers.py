@@ -9,15 +9,13 @@ class TagSerializer(serializers.ModelSerializer):
 
 class BookSerializer(serializers.ModelSerializer):
     tags = serializers.SlugRelatedField(
-        many=True, slug_field='name', queryset=Tag.objects.all()
+        many=True, slug_field='name', queryset=Tag.objects.all(), required=False
     )
-    remaining_borrows = serializers.SerializerMethodField()
+    selectedTags = serializers.CharField(write_only=True, required=False)
     custom_tag = serializers.CharField(write_only=True, required=False)
-    selectedTags = serializers.ListField(
-        child=serializers.CharField(), write_only=True, required=False
-    )
     publisher_name = serializers.SerializerMethodField()
-    cover_image = serializers.URLField(max_length=200, min_length=None, allow_blank=False)  # เพิ่ม field นี้
+    cover_image = serializers.URLField(max_length=200, min_length=None, allow_blank=False)
+    remaining_borrows = serializers.SerializerMethodField()
 
     class Meta:
         model = Book
@@ -27,6 +25,25 @@ class BookSerializer(serializers.ModelSerializer):
             'borrow_count', 'custom_tag', 'selectedTags'
         ]
         read_only_fields = ['publisher', 'borrow_count']
+
+    def validate(self, data):
+        """
+        ตรวจสอบว่าใช้แค่ selectedTags หรือ custom_tag อย่างใดอย่างหนึ่ง
+        """
+        selected_tags = data.get('selectedTags')
+        custom_tag = data.get('custom_tag')
+
+        if selected_tags and custom_tag:
+            raise serializers.ValidationError(
+                "Please choose either an existing tag or create a new tag, not both"
+            )
+        
+        if not selected_tags and not custom_tag:
+            raise serializers.ValidationError(
+                "Please provide either an existing tag or create a new tag"
+            )
+
+        return data
 
     def get_remaining_borrows(self, obj):
         return obj.remaining_borrows()
@@ -38,32 +55,34 @@ class BookSerializer(serializers.ModelSerializer):
         # แยก tags และ custom_tag ออกจาก validated_data
         tags_data = validated_data.pop('tags', [])
         custom_tag = validated_data.pop('custom_tag', None)
-        selected_tags = validated_data.pop('selectedTags', [])
-
-        # ทำความสะอาดข้อมูล selected_tags
-        clean_tags = []
-        for tag in selected_tags:
-            # ถ้าเป็น string ที่มี quotes หรือ brackets
-            if isinstance(tag, str):
-                # ลบ quotes, brackets และ whitespace
-                clean_tag = tag.strip('[]"\' ')
-                if clean_tag:
-                    clean_tags.append(clean_tag)
+        selected_tag = validated_data.pop('selectedTags', None)
 
         # สร้าง book
         book = Book.objects.create(**validated_data)
 
-        # จัดการ selected tags ที่ผ่านการทำความสะอาดแล้ว
-        if clean_tags:
-            # ใช้ filter เพื่อดึงเฉพาะ tags ที่มีอยู่แล้ว
-            existing_tags = Tag.objects.filter(name__in=clean_tags)
-            for tag in existing_tags:
-                book.tags.add(tag)
+        try:
+            # จัดการ selected tag (เลือกจากระบบ)
+            if selected_tag:
+                # ทำความสะอาดข้อมูล selected tag
+                clean_tag = selected_tag.strip('[]"\' ')
+                if clean_tag:
+                    tag_obj = Tag.objects.get(name=clean_tag)
+                    book.tags.add(tag_obj)
 
-        # จัดการ custom tag
-        if custom_tag:
-            tag_obj, _ = Tag.objects.get_or_create(name=custom_tag)
-            book.tags.add(tag_obj)
+            # จัดการ custom tag (สร้างใหม่)
+            elif custom_tag:
+                # ทำความสะอาดข้อมูล custom tag
+                clean_tag = custom_tag.strip()
+                if clean_tag:
+                    tag_obj, created = Tag.objects.get_or_create(
+                        name=clean_tag
+                    )
+                    book.tags.add(tag_obj)
+
+        except Exception as e:
+            # ลบ book ถ้าเกิดข้อผิดพลาดในการจัดการ tag
+            book.delete()
+            raise serializers.ValidationError(f"Error handling tags: {str(e)}")
 
         return book
 
@@ -75,4 +94,4 @@ class BookBorrowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BookBorrow
-        fields = ['id', 'book', 'book_id', 'borrow_date', 'due_date', 'returned_at'] # เพิ่ม returned_at
+        fields = ['id', 'book', 'book_id', 'borrow_date', 'due_date', 'returned_at']

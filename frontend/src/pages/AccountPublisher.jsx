@@ -56,28 +56,26 @@ const AccountPublisher = () => {
     e.preventDefault();
     try {
       let coverImageUrl = null;
-      // let pdfFileUrl = null;
 
-      // อัปโหลดรูปภาพ
       if (newBook.cover_image instanceof File) {
         coverImageUrl = await uploadImage(newBook.cover_image);
         console.log("coverImageUrl:", coverImageUrl);
       }
 
-      // อัปโหลด PDF
-      // if (newBook.pdf_file instanceof File) {
-      //   pdfFileUrl = await uploadPDF(newBook.pdf_file);
-      //   console.log("pdfFileUrl:", pdfFileUrl);
-      // }
-
       const formData = new FormData();
-
 
       formData.append('title', newBook.title);
       formData.append('description', newBook.description);
       formData.append('lending_period', newBook.lending_period);
       formData.append('max_borrowers', newBook.max_borrowers);
-      formData.append('selectedTags', JSON.stringify(newBook.selectedTags));
+
+      // ส่งแค่ selectedTags หรือ custom_tag อย่างใดอย่างหนึ่ง
+      if (newBook.selectedTags.length > 0) {
+        // ส่งแค่แท็กแรกที่เลือก
+        formData.append('selectedTags', newBook.selectedTags[0]);
+      } else if (newBook.custom_tag) {
+        formData.append('custom_tag', newBook.custom_tag);
+      }
 
       if (coverImageUrl) {
         formData.append('cover_image', coverImageUrl);
@@ -87,18 +85,6 @@ const AccountPublisher = () => {
         formData.append('pdf_file', newBook.pdf_file);
       }
 
-      if (newBook.selectedTags.length > 0) {
-        formData.append('tags', newBook.selectedTags.join(','));
-      }
-
-
-
-
-
-      if (newBook.custom_tag) {
-        formData.append('custom_tag', newBook.custom_tag);
-      }
-
       const response = await axios.post('http://127.0.0.1:8000/api/books/add/', formData, {
         headers: {
           Authorization: `Token ${localStorage.getItem('token')}`,
@@ -106,29 +92,24 @@ const AccountPublisher = () => {
         },
       });
 
-
-
-
-
-
-
-
-
       setAccountData(prev => ({
         ...prev,
         published_books: [...prev.published_books, response.data]
       }));
-
 
       setShowAddBookModal(false);
       setNewBook({
         title: '',
         description: '',
         lending_period: 14,
+        max_borrowers: 1,
+        cover_image: '',
+        pdf_file: null,
+        selectedTags: [],
         custom_tag: '',
       });
     } catch (err) {
-      console.error("Error adding book:", err);
+      console.error("Error adding book:", err.response?.data);
       alert('Failed to add book. Please try again.');
     }
   };
@@ -153,13 +134,27 @@ const AccountPublisher = () => {
   };
 
   const handleTagSelection = (tagName) => {
-    let updatedTags = [...newBook.selectedTags];
-    if (updatedTags.includes(tagName)) {
-      updatedTags = updatedTags.filter(tag => tag !== tagName);
-    } else {
-      updatedTags.push(tagName);
+    if (newBook.custom_tag) {
+        alert('กรุณาเลือกเฉพาะแท็กที่มีอยู่ หรือสร้างแท็กใหม่อย่างใดอย่างหนึ่ง');
+        return;
     }
-    setNewBook({ ...newBook, selectedTags: updatedTags });
+    setNewBook({ 
+        ...newBook, 
+        selectedTags: [tagName],  // เก็บแค่แท็กเดียว
+    });
+  };
+
+  const handleCustomTagChange = (e) => {
+    if (newBook.selectedTags.length > 0) {
+        alert('กรุณาเลือกเฉพาะแท็กที่มีอยู่ หรือสร้างแท็กใหม่อย่างใดอย่างหนึ่ง');
+        e.target.value = '';  // เคลียร์ค่าใน input
+        return;
+    }
+    setNewBook({ 
+        ...newBook, 
+        custom_tag: e.target.value,
+        selectedTags: []  // เคลียร์ selected tags
+    });
   };
 
   const handleImageUpload = (event) => {
@@ -188,6 +183,13 @@ const AccountPublisher = () => {
         pdf_file: file  // เก็บไฟล์ไว้ใน state
       }));
     }
+  };
+
+  const handleRemoveTag = () => {
+    setNewBook({
+        ...newBook,
+        selectedTags: []
+    });
   };
 
   if (error) return <p>{error}</p>;
@@ -243,81 +245,113 @@ const AccountPublisher = () => {
         <div className="modal">
           <div className="modal-content">
             <h3>เพิ่มหนังสือใหม่</h3>
-            <form onSubmit={handleAddBookSubmit}>
-              <div>
-                <label>ชื่อหนังสือ:</label>
+            <form onSubmit={handleAddBookSubmit} className="book-form">
+              <div className="form-group">
+                <label>ชื่อหนังสือ</label>
                 <input
                   type="text"
                   value={newBook.title}
                   onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
+                  placeholder="กรอกชื่อหนังสือ"
                   required
                 />
               </div>
-              <div>
-                <label>คำอธิบาย:</label>
+
+              <div className="form-group">
+                <label>คำอธิบาย</label>
                 <textarea
                   value={newBook.description}
                   onChange={(e) => setNewBook({ ...newBook, description: e.target.value })}
+                  placeholder="กรอกคำอธิบายหนังสือ"
                   required
                 />
               </div>
-              <div>
-                <label>จำนวนสูงสุดที่ยืมได้:</label>
-                <input
-                  type="number"
-                  value={newBook.max_borrowers}
-                  onChange={(e) => setNewBook({ ...newBook, max_borrowers: e.target.value })}
-                  required
-                />
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>จำนวนสูงสุดที่ยืมได้</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newBook.max_borrowers}
+                    onChange={(e) => setNewBook({ ...newBook, max_borrowers: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>ระยะเวลาที่ยืมได้ (วัน)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={newBook.lending_period}
+                    onChange={(e) => setNewBook({ ...newBook, lending_period: e.target.value })}
+                    required
+                  />
+                </div>
               </div>
-              <div>
-                <label>เวลาที่สามารถยืมได้ (วัน):</label>
-                <input
-                  type="number"
-                  value={newBook.lending_period}
-                  onChange={(e) => setNewBook({ ...newBook, lending_period: e.target.value })}
-                  required
-                />
-              </div>
-              <div>
-                <label>แท็กหนังสือ:</label>
+
+              <div className="form-group">
+                <label>แท็กหนังสือ</label>
                 <div className="tag-selection">
-                  <button type="button" onClick={openTagModal}>เลือกแท็กหนังสือ</button>
+                  <button type="button" onClick={openTagModal}>
+                    เลือกแท็กหนังสือ
+                  </button>
                   <div className="selected-tags">
                     {newBook.selectedTags.map((tag, index) => (
-                      <span key={index} className="tag-item">{tag}</span>
+                      <span key={index} className="tag-item">
+                        {tag}
+                        <button 
+                          type="button" 
+                          onClick={handleRemoveTag}
+                          className="remove-tag"
+                        >
+                          ✕
+                        </button>
+                      </span>
                     ))}
                   </div>
                 </div>
               </div>
-              <div>
-                <label>เพิ่มแท็กใหม่ (ถ้าต้องการ):</label>
+
+              <div className="form-group">
+                <label>เพิ่มแท็กใหม่</label>
                 <input
                   type="text"
                   value={newBook.custom_tag}
-                  onChange={(e) => setNewBook({ ...newBook, custom_tag: e.target.value })}
+                  onChange={handleCustomTagChange}
+                  placeholder="พิมพ์เพื่อสร้างแท็กใหม่"
                 />
               </div>
-              <div>
-                <label>Upload Image:</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  required
-                />
+
+              <div className="form-group">
+                <label>รูปภาพปก</label>
+                <div className="file-upload">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    required
+                  />
+                </div>
               </div>
-              <div>
-                <label>Upload PDF:</label>
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handlePDFUpload}
-                />
+
+              <div className="form-group">
+                <label>ไฟล์ PDF</label>
+                <div className="file-upload">
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handlePDFUpload}
+                  />
+                </div>
               </div>
+
               <div className="modal-actions">
-                <button type="submit">ยืนยันการลงหนังสือ</button>
-                <button type="button" onClick={() => setShowAddBookModal(false)}>ยกเลิก</button>
+                <button type="submit">ยืนยันการเพิ่มหนังสือ</button>
+                <button type="button" onClick={() => setShowAddBookModal(false)}>
+                  ยกเลิก
+                </button>
               </div>
             </form>
           </div>
