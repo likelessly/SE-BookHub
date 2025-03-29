@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { FaSearch, FaTimes } from 'react-icons/fa'; // Make sure to install react-icons
 import './MainPage.css';
 
 const MainPage = () => {
@@ -14,6 +15,8 @@ const MainPage = () => {
   // eslint-disable-next-line no-unused-vars
   const [isTagOpen, setIsTagOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterBy, setFilterBy] = useState('all');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -77,15 +80,15 @@ const MainPage = () => {
   // ฟังก์ชันกรองหนังสือตาม search query และ selected tags
   const filteredBooks = books.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTags = selectedTags.length === 0 || 
+    const matchesTags = selectedTags.length === 0 ||
       (book.tags && selectedTags.every(tag => book.tags.includes(tag)));
     return matchesSearch && matchesTags;
   });
 
   // Add tag management functions
   const handleTagSelect = (tagName) => {
-    setSelectedTags(prev => 
-      prev.includes(tagName) 
+    setSelectedTags(prev =>
+      prev.includes(tagName)
         ? prev.filter(t => t !== tagName)
         : [...prev, tagName]
     );
@@ -136,14 +139,58 @@ const MainPage = () => {
 
         {/* ส่วนหลักของหน้าที่แสดงหนังสือ */}
         <div className="main-content">
+          
+          {/* Library Books Header */}
+          <div className="section-header">
+            <h2>Library Books</h2>
+          </div>
+
           {/* Search Bar ด้านขวาบน */}
           <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search books..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <div className="search-bar">
+              <span className="search-icon">
+                <FaSearch />
+              </span>
+              <input
+                type="text"
+                placeholder="Search for books by title, author, or tags..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button
+                  className="search-clear"
+                  onClick={() => setSearchTerm('')}
+                  aria-label="Clear search"
+                >
+                  <FaTimes />
+                </button>
+              )}
+            </div>
+
+            {/* Optional: Show number of results */}
+            {filteredBooks.length > 0 && (
+              <div className="search-results-count">
+                Found {filteredBooks.length} {filteredBooks.length === 1 ? 'book' : 'books'}
+              </div>
+            )}
+
+            {/* Optional: Add search filters */}
+            <div className="search-filters">
+              <button
+                className={`filter-button ${filterBy === 'all' ? 'active' : ''}`}
+                onClick={() => setFilterBy('all')}
+              >
+                All Books
+              </button>
+              <button
+                className={`filter-button ${filterBy === 'available' ? 'active' : ''}`}
+                onClick={() => setFilterBy('available')}
+              >
+                Available Only
+              </button>
+              {/* Add more filter buttons as needed */}
+            </div>
           </div>
 
           {/* รายการหนังสือ */}
@@ -194,7 +241,7 @@ const MainPage = () => {
               <div className="no-results">
                 <img src="/no-result.png" alt="No books found" />
                 <p>No books match your search criteria.</p>
-                <button onClick={() => {setSearchQuery(''); setSelectedTags([]);}}>Clear Filters</button>
+                <button onClick={() => { setSearchQuery(''); setSelectedTags([]); }}>Clear Filters</button>
               </div>
             )}
           </div>
