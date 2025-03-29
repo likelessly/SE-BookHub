@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -19,7 +18,7 @@ const EditBook = () => {
     description: '',
     lending_period: 14,
     max_borrowers: 1,
-    cover_image: '',
+    cover_image: null,
     pdf_file: null,
     selectedTags: [],
   });
@@ -82,34 +81,47 @@ const EditBook = () => {
     setLoading(true);
     
     try {
-      let coverImageUrl = bookData.cover_image;
-      let pdfFileUrl = bookData.pdf_file;
-
+      // Create a new FormData object for multipart/form-data submission
+      const formData = new FormData();
+      
+      // Add basic text fields
+      formData.append('title', bookData.title.trim());
+      formData.append('description', bookData.description.trim());
+      formData.append('lending_period', parseInt(bookData.lending_period));
+      formData.append('max_borrowers', parseInt(bookData.max_borrowers));
+      
+      // Add tags as a JSON string
+      formData.append('tags', JSON.stringify(bookData.selectedTags));
+      
+      // Handle cover image
       if (bookData.new_cover_image instanceof File) {
-        coverImageUrl = await uploadImage(bookData.new_cover_image);
+        // If a new image was selected, upload it
+        const coverImageUrl = await uploadImage(bookData.new_cover_image);
+        formData.append('cover_image', coverImageUrl);
+      } else if (bookData.cover_image) {
+        // If using existing image, just pass the URL
+        formData.append('cover_image', bookData.cover_image);
       }
-
+      
+      // Handle PDF file
       if (bookData.new_pdf_file instanceof File) {
-        pdfFileUrl = await uploadPDF(bookData.new_pdf_file);
+        // If a new PDF was selected, upload it
+        const pdfFileUrl = await uploadPDF(bookData.new_pdf_file);
+        formData.append('pdf_file', pdfFileUrl);
+      } else if (bookData.pdf_file) {
+        // If using existing PDF, do NOT append the old URL
+        // Instead, let the backend know to keep the existing file
+        formData.append('keep_existing_pdf', 'true');
       }
-
-      const updateData = {
-        title: bookData.title.trim(),
-        description: bookData.description.trim(),
-        lending_period: parseInt(bookData.lending_period),
-        max_borrowers: parseInt(bookData.max_borrowers),
-        tags: bookData.selectedTags,
-        ...(coverImageUrl && { cover_image: coverImageUrl }),
-        ...(pdfFileUrl && { pdf_file: pdfFileUrl })
-      };
-
+      
+      // Send the update request
       const response = await axios.put(
         `http://127.0.0.1:8000/api/books/update/${bookId}/`,
-        updateData,
+        formData,
         {
           headers: {
             'Authorization': `Token ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
+            'Content-Type': 'multipart/form-data', // Important for file uploads
           }
         }
       );

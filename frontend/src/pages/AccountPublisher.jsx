@@ -2,14 +2,17 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './Account.css';
 import { useNavigate } from 'react-router-dom';
-import { uploadImage} from '../api';
+import { uploadImage } from '../api';
+import { FaPlus, FaEdit, FaTrash, FaBook, FaTag, FaUpload } from 'react-icons/fa';
 
 const AccountPublisher = () => {
   const [accountData, setAccountData] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showAddBookModal, setShowAddBookModal] = useState(false);
   const [showTagModal, setShowTagModal] = useState(false);
   const [availableTags, setAvailableTags] = useState([]);
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
   const [newBook, setNewBook] = useState({
     title: '',
     description: '',
@@ -23,33 +26,53 @@ const AccountPublisher = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    setLoading(true);
     axios
       .get('http://127.0.0.1:8000/api/account/publisher/', {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Token ${token}` },
       })
-      .then(response => setAccountData(response.data))
+      .then(response => {
+        setAccountData(response.data);
+        setLoading(false);
+      })
       .catch(err => {
         console.error("Error fetching account data:", err.response?.data);
         setError('Failed to load account data.');
+        setLoading(false);
       });
-  }, []);
+  }, [navigate]);
 
-  const handleRemoveBook = (bookId) => {
-    axios
-      .delete(`http://127.0.0.1:8000/api/books/remove/${bookId}/`, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
-      })
-      // eslint-disable-next-line no-unused-vars
-      .then(response => {
-        setAccountData(prev => ({
-          ...prev,
-          published_books: prev.published_books.filter(b => b.id !== bookId)
-        }));
-      })
-      .catch(err => {
-        console.error("Error removing book:", err.response?.data);
-        alert('Failed to remove book.');
-      });
+  const showNotification = (type, message) => {
+    setNotification({ show: true, type, message });
+    setTimeout(() => {
+      setNotification({ show: false, message: '', type: '' });
+    }, 3000);
+  };
+
+  const handleRemoveBook = (bookId, bookTitle) => {
+    if (window.confirm(`Are you sure you want to remove "${bookTitle}"?`)) {
+      axios
+        .delete(`http://127.0.0.1:8000/api/books/remove/${bookId}/`, {
+          headers: { Authorization: `Token ${localStorage.getItem('token')}` },
+        })
+        .then(() => {
+          setAccountData(prev => ({
+            ...prev,
+            published_books: prev.published_books.filter(b => b.id !== bookId)
+          }));
+          showNotification('success', `"${bookTitle}" has been removed successfully`);
+        })
+        .catch(err => {
+          console.error("Error removing book:", err.response?.data);
+          showNotification('error', 'Failed to remove book. Please try again.');
+        });
+    }
   };
 
   const handleAddBookSubmit = async (e) => {
@@ -59,7 +82,6 @@ const AccountPublisher = () => {
 
       if (newBook.cover_image instanceof File) {
         coverImageUrl = await uploadImage(newBook.cover_image);
-        console.log("coverImageUrl:", coverImageUrl);
       }
 
       const formData = new FormData();
@@ -69,9 +91,7 @@ const AccountPublisher = () => {
       formData.append('lending_period', newBook.lending_period);
       formData.append('max_borrowers', newBook.max_borrowers);
 
-      // ส่งแค่ selectedTags หรือ custom_tag อย่างใดอย่างหนึ่ง
       if (newBook.selectedTags.length > 0) {
-        // ส่งแค่แท็กแรกที่เลือก
         formData.append('selectedTags', newBook.selectedTags[0]);
       } else if (newBook.custom_tag) {
         formData.append('custom_tag', newBook.custom_tag);
@@ -97,6 +117,8 @@ const AccountPublisher = () => {
         published_books: [...prev.published_books, response.data]
       }));
 
+      showNotification('success', `"${newBook.title}" has been added successfully`);
+
       setShowAddBookModal(false);
       setNewBook({
         title: '',
@@ -110,7 +132,7 @@ const AccountPublisher = () => {
       });
     } catch (err) {
       console.error("Error adding book:", err.response?.data);
-      alert('Failed to add book. Please try again.');
+      showNotification('error', 'Failed to add book. Please check your inputs and try again.');
     }
   };
 
@@ -124,7 +146,7 @@ const AccountPublisher = () => {
       })
       .catch(err => {
         console.error("Error fetching tags:", err.response?.data);
-        alert('Failed to load tags.');
+        showNotification('error', 'Failed to load tags.');
       });
   };
 
@@ -135,25 +157,25 @@ const AccountPublisher = () => {
 
   const handleTagSelection = (tagName) => {
     if (newBook.custom_tag) {
-        alert('กรุณาเลือกเฉพาะแท็กที่มีอยู่ หรือสร้างแท็กใหม่อย่างใดอย่างหนึ่ง');
-        return;
+      showNotification('error', 'Please choose either an existing tag or create a new one');
+      return;
     }
     setNewBook({ 
-        ...newBook, 
-        selectedTags: [tagName],  // เก็บแค่แท็กเดียว
+      ...newBook, 
+      selectedTags: [tagName],
     });
   };
 
   const handleCustomTagChange = (e) => {
     if (newBook.selectedTags.length > 0) {
-        alert('กรุณาเลือกเฉพาะแท็กที่มีอยู่ หรือสร้างแท็กใหม่อย่างใดอย่างหนึ่ง');
-        e.target.value = '';  // เคลียร์ค่าใน input
-        return;
+      showNotification('error', 'Please choose either an existing tag or create a new one');
+      e.target.value = '';
+      return;
     }
     setNewBook({ 
-        ...newBook, 
-        custom_tag: e.target.value,
-        selectedTags: []  // เคลียร์ selected tags
+      ...newBook, 
+      custom_tag: e.target.value,
+      selectedTags: []
     });
   };
 
@@ -161,12 +183,12 @@ const AccountPublisher = () => {
     const file = event.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        alert('Please upload an image file (PNG, JPEG)');
+        showNotification('error', 'Please upload an image file (PNG, JPEG)');
         return;
       }
       setNewBook(prev => ({
         ...prev,
-        cover_image: file  // เก็บไฟล์ไว้ใน state
+        cover_image: file
       }));
     }
   };
@@ -175,101 +197,176 @@ const AccountPublisher = () => {
     const file = event.target.files[0];
     if (file) {
       if (file.type !== 'application/pdf') {
-        alert('Please upload a PDF file');
+        showNotification('error', 'Please upload a PDF file');
         return;
       }
       setNewBook(prev => ({
         ...prev,
-        pdf_file: file  // เก็บไฟล์ไว้ใน state
+        pdf_file: file
       }));
     }
   };
 
   const handleRemoveTag = () => {
     setNewBook({
-        ...newBook,
-        selectedTags: []
+      ...newBook,
+      selectedTags: []
     });
   };
 
-  if (error) return <p>{error}</p>;
-  if (!accountData) return <p>Loading...</p>;
+  if (loading) return (
+    <div className="loading-container">
+      <div className="loading-spinner"></div>
+      <p>Loading your publisher account...</p>
+    </div>
+  );
+
+  if (error) return (
+    <div className="error-container">
+      <p>{error}</p>
+      <button onClick={() => navigate('/')}>Back to Home</button>
+    </div>
+  );
 
   return (
     <div className="account-page">
+      {notification.show && (
+        <div className={`notification ${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
+      
       <div className="account-left">
-        <img src={accountData.user.profile_image || "/publisher_default.jpg"} alt="Profile" />
+        <img 
+          src={accountData.user.profile_image || "/publisher_default.jpg"} 
+          alt="Profile"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "/publisher_default.jpg";
+          }}
+        />
         <h2>{accountData.user.name}</h2>
-        <p>Role: {accountData.user.role}</p>
-        <p>Registered: {new Date(accountData.user.registered_at).toLocaleDateString()}</p>
-        <p>Published Books: {accountData.user.book_count}</p>
-        <button onClick={() => {
-          localStorage.removeItem('token');
-          navigate('/');
-        }}>Logout</button>
+        
+        <p>
+          <span>Role:</span>
+          <span>{accountData.user.role}</span>
+        </p>
+        <p>
+          <span>Registered:</span>
+          <span>{new Date(accountData.user.registered_at).toLocaleDateString()}</span>
+        </p>
+        <p>
+          <span>Published Books:</span>
+          <span>{accountData.user.book_count}</span>
+        </p>
+        
+        <button 
+          className="logout-button" 
+          onClick={() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            navigate('/');
+          }}
+        >
+          Logout
+        </button>
       </div>
 
       <div className="account-right">
         <div className="top-controls">
-          <button onClick={() => setShowAddBookModal(true)}>เพิ่มหนังสือ</button>
+          <h3>My Published Books</h3>
+          <button onClick={() => setShowAddBookModal(true)}>
+            <FaPlus />
+            Add New Book
+          </button>
         </div>
-        <h3>รายการหนังสือที่ลง</h3>
-        <div className="books-list">
-          {accountData.published_books.map(book => (
-            <div key={book.id} className="book-item">
-              {console.log("book.cover_image:", book.cover_image)}
-              <img
-                src={book.cover_image}
-                alt={book.title}
-                onError={(e) => {
-                  console.error('Error loading image:', book.cover_image);
-                  e.target.onerror = null;
-                  e.target.src = "/cover_default.jpg";
-                }}
-                style={{ maxWidth: '200px', height: 'auto', objectFit: 'cover' }}
-              />
-              <div className="book-info">
-                <h4>{book.title}</h4>
-                <p>จำนวนถูกยืม: {book.borrow_count}</p>
-                <div className="book-actions">
-                  <button onClick={() => navigate(`/edit-book/${book.id}`)}>แก้ไขหนังสือ</button>
-                  <button onClick={() => handleRemoveBook(book.id)}>ถอนหนังสือ</button>
+        
+        {accountData.published_books.length > 0 ? (
+          <div className="books-list">
+            {accountData.published_books.map(book => (
+              <div key={book.id} className="book-item">
+                <div className="book-cover">
+                  <img
+                    src={book.cover_image}
+                    alt={book.title}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/cover_default.jpg";
+                    }}
+                  />
+                </div>
+                <div className="book-info">
+                  <h4>{book.title}</h4>
+                  <p className="borrow-count">
+                    <FaBook />
+                    <span>Borrowed:</span> {book.borrow_count} times
+                  </p>
+                  
+                  {book.tags && book.tags.length > 0 && (
+                    <div className="book-tags">
+                      {book.tags.map((tag, index) => (
+                        <span key={index} className="tag-pill">{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="book-actions">
+                    <button 
+                      className="edit-button"
+                      onClick={() => navigate(`/edit-book/${book.id}`)}
+                    >
+                      <FaEdit />
+                      Edit
+                    </button>
+                    <button 
+                      className="remove-button"
+                      onClick={() => handleRemoveBook(book.id, book.title)}
+                    >
+                      <FaTrash />
+                      Remove
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="no-books-message">
+            <p>You haven't published any books yet.</p>
+            <button onClick={() => setShowAddBookModal(true)}>Publish Your First Book</button>
+          </div>
+        )}
       </div>
 
       {showAddBookModal && (
         <div className="modal">
           <div className="modal-content">
-            <h3>เพิ่มหนังสือใหม่</h3>
+            <h3>Add New Book</h3>
             <form onSubmit={handleAddBookSubmit} className="book-form">
               <div className="form-group">
-                <label>ชื่อหนังสือ</label>
+                <label>Book Title</label>
                 <input
                   type="text"
                   value={newBook.title}
                   onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
-                  placeholder="กรอกชื่อหนังสือ"
+                  placeholder="Enter book title"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label>คำอธิบาย</label>
+                <label>Description</label>
                 <textarea
                   value={newBook.description}
                   onChange={(e) => setNewBook({ ...newBook, description: e.target.value })}
-                  placeholder="กรอกคำอธิบายหนังสือ"
+                  placeholder="Enter book description"
                   required
                 />
               </div>
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>จำนวนสูงสุดที่ยืมได้</label>
+                  <label>Maximum Borrowers</label>
                   <input
                     type="number"
                     min="1"
@@ -280,7 +377,7 @@ const AccountPublisher = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>ระยะเวลาที่ยืมได้ (วัน)</label>
+                  <label>Lending Period (days)</label>
                   <input
                     type="number"
                     min="1"
@@ -292,10 +389,10 @@ const AccountPublisher = () => {
               </div>
 
               <div className="form-group">
-                <label>แท็กหนังสือ</label>
+                <label>Book Tag</label>
                 <div className="tag-selection">
                   <button type="button" onClick={openTagModal}>
-                    เลือกแท็กหนังสือ
+                    <FaTag /> Select Book Tag
                   </button>
                   <div className="selected-tags">
                     {newBook.selectedTags.map((tag, index) => (
@@ -315,18 +412,20 @@ const AccountPublisher = () => {
               </div>
 
               <div className="form-group">
-                <label>เพิ่มแท็กใหม่</label>
+                <label>Create New Tag</label>
                 <input
                   type="text"
                   value={newBook.custom_tag}
                   onChange={handleCustomTagChange}
-                  placeholder="พิมพ์เพื่อสร้างแท็กใหม่"
+                  placeholder="Type to create a new tag"
                 />
               </div>
 
               <div className="form-group">
-                <label>รูปภาพปก</label>
+                <label>Cover Image</label>
                 <div className="file-upload">
+                  <FaUpload />
+                  <p>Click to select an image file</p>
                   <input
                     type="file"
                     accept="image/*"
@@ -337,20 +436,23 @@ const AccountPublisher = () => {
               </div>
 
               <div className="form-group">
-                <label>ไฟล์ PDF</label>
+                <label>PDF File</label>
                 <div className="file-upload">
+                  <FaUpload />
+                  <p>Click to select a PDF file</p>
                   <input
                     type="file"
                     accept="application/pdf"
                     onChange={handlePDFUpload}
+                    required
                   />
                 </div>
               </div>
 
               <div className="modal-actions">
-                <button type="submit">ยืนยันการเพิ่มหนังสือ</button>
+                <button type="submit">Add Book</button>
                 <button type="button" onClick={() => setShowAddBookModal(false)}>
-                  ยกเลิก
+                  Cancel
                 </button>
               </div>
             </form>
@@ -361,7 +463,7 @@ const AccountPublisher = () => {
       {showTagModal && (
         <div className="modal tag-modal">
           <div className="modal-content">
-            <h3>เลือกแท็กหนังสือ</h3>
+            <h3>Select Book Tag</h3>
             <div className="tags-list">
               {availableTags.length > 0 ? (
                 availableTags.map(tag => (
@@ -377,11 +479,11 @@ const AccountPublisher = () => {
                   </div>
                 ))
               ) : (
-                <p>No tags available.</p>
+                <p>No tags available. Create a new tag instead.</p>
               )}
             </div>
             <div className="modal-actions">
-              <button type="button" onClick={() => setShowTagModal(false)}>ปิด</button>
+              <button type="button" onClick={() => setShowTagModal(false)}>Close</button>
             </div>
           </div>
         </div>

@@ -241,26 +241,83 @@ class ReadBookView(APIView):
 
 class EditBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
+    parser_classes = [MultiPartParser, FormParser]  # Add this line for proper file handling
+    
     def put(self, request, book_id):
+        # Get the book to update
+        book = get_object_or_404(Book, id=book_id)
+        
+        # Check if user is the publisher
+        if book.publisher != request.user:
+            return Response({"detail": "You are not authorized to update this book."}, 
+                           status=status.HTTP_403_FORBIDDEN)
+        
+        # Extract data from request
+        data = request.data
+        logger.info(f"Received data for book update: {data.keys()}")
+        
         try:
-            # Get book and verify ownership
-            book = Book.objects.get(id=book_id, publisher=request.user)
+            # Handle text fields
+            if 'title' in data:
+                book.title = data['title']
+            if 'description' in data:
+                book.description = data['description']
+            if 'lending_period' in data and data['lending_period']:
+                book.lending_period = int(data['lending_period'])
+            if 'max_borrowers' in data and data['max_borrowers']:
+                book.max_borrowers = int(data['max_borrowers'])
             
-            # Update book with partial data
-            serializer = BookSerializer(
-                book,
-                data=request.data,
-                partial=True  # Allow partial updates
-            )
+            # Handle tags (sent as JSON string)
+            if 'tags' in data and data['tags']:
+                try:
+                    import json
+                    tags_list = json.loads(data['tags'])
+                    # Clear existing tags
+                    book.tags.clear()
+                    # Add new tags
+                    for tag_name in tags_list:
+                        tag, created = Tag.objects.get_or_create(name=tag_name)
+                        book.tags.add(tag)
+                except Exception as e:
+                    logger.error(f"Error processing tags: {str(e)}")
             
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Handle cover image
+            if 'cover_image' in data and data['cover_image']:
+                # Check if it's a file or URL string
+                if hasattr(data['cover_image'], 'read'):
+                    # It's a file object - handle file upload
+                    logger.info("Handling new cover image upload")
+                    # Your existing cover image upload logic
+                else:
+                    # It's a URL string - just update the field
+                    logger.info("Using existing cover image URL")
+                    book.cover_image = data['cover_image']
             
-        except Book.DoesNotExist:
-            return Response(
-                {"detail": "Book not found or you don't have permission to edit it"},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            # Handle PDF file - THIS IS THE KEY PART
+            if 'pdf_file' in data and data['pdf_file']:
+                # Check if it's a file object or string
+                if hasattr(data['pdf_file'], 'read'):
+                    # It's a file object - handle as new upload
+                    logger.info("Handling new PDF file upload")
+                    # Your existing PDF upload logic
+                else:
+                    # It's a string - just update the field if it's a valid path
+                    logger.info("Using existing PDF file path")
+                    book.pdf_file = data['pdf_file']
+            elif 'keep_existing_pdf' in data and data['keep_existing_pdf'] == 'true':
+                # Do nothing - keep the existing PDF
+                logger.info("Keeping existing PDF file")
+                pass
+            
+            # Save the updated book
+            book.save()
+            logger.info(f"Book {book_id} updated successfully")
+            
+            # Return serialized book data
+            serializer = BookSerializer(book)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f"Error updating book {book_id}: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
