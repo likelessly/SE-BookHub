@@ -302,7 +302,7 @@ const AccountReader = () => {
           </div>
         ) : (
           <div className="no-books-message">
-            <img src="/empty-books.svg" alt="No books" />
+            <img src="/no-result.png" alt="No books" />
             <h3>Your bookshelf is empty!</h3>
             <p>You haven't borrowed any books yet. Start exploring our library to find your next great read.</p>
             <button onClick={() => navigate('/main')}>Browse Library</button>
