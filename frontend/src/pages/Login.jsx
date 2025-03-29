@@ -131,8 +131,8 @@ const Login = () => {
       
       <p>
         Don't have an account?&nbsp;
-        <Link to="/signup/reader">Signup as Reader</Link> |&nbsp;
-        <Link to="/signup/publisher">Signup as Publisher</Link>
+        <Link to="/signup/reader">Sign up as Reader</Link> |&nbsp;
+        <Link to="/signup/publisher">Sign up as Publisher</Link>
       </p>
     </div>
   );
