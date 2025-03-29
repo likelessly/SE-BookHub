@@ -161,17 +161,38 @@ class ReadBookView(APIView):
 
     def get(self, request, borrow_id):
         try:
-            borrow_entry = BookBorrow.objects.get(id=borrow_id, reader=request.user)
-            if borrow_entry.due_date < timezone.now():
-                borrow_entry.returned = True
-                borrow_entry.save()
-                return Response({"error": "Borrowing period has expired."},
-                                status=status.HTTP_403_FORBIDDEN)
+            # ตรวจสอบว่าการยืมนี้เป็นของผู้ใช้ที่ล็อกอินอยู่
+            borrow_entry = get_object_or_404(BookBorrow, id=borrow_id, reader=request.user)
 
-            # ...โค้ดสำหรับสร้าง Signed URL...
+            # ตรวจสอบว่าเวลายืมหมดอายุหรือไม่
+            if borrow_entry.due_date < timezone.now():
+                return Response({"error": "Borrowing period has expired."}, status=status.HTTP_403_FORBIDDEN)
+
+            # ตรวจสอบว่าหนังสือมีไฟล์ PDF หรือไม่
+            book = borrow_entry.book
+            if not book.pdf_file:
+                return Response({"error": "PDF file not found for this book."}, status=status.HTTP_404_NOT_FOUND)
+
+            # สร้าง Signed URL สำหรับไฟล์ PDF
+            file_name = book.pdf_file.name
+            file_path = f"pdfs/{file_name}" if not file_name.startswith('pdfs/') else file_name
+
+            response = supabase.storage.from_("Bookhub_pdf").create_signed_url(
+                path=file_path,
+                expires_in=3600  # URL valid for 1 hour
+            )
+
+            if not response or not response.get("signedURL"):
+                return Response({"error": "Failed to generate signed URL."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({"signed_url": response["signedURL"]}, status=status.HTTP_200_OK)
+
         except BookBorrow.DoesNotExist:
-            return Response({"error": "Borrow record not found."},
-                            status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Borrow record not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            # จัดการข้อผิดพลาดทั่วไป
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class EditBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
