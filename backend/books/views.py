@@ -16,6 +16,8 @@ from django.conf import settings
 from .storages import PrivateMediaStorage
 from supabase import create_client
 import logging
+from django.core.files.storage import default_storage
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -107,8 +109,51 @@ class RemoveBookView(APIView):
     def delete(self, request, book_id):
         user = request.user
         book = get_object_or_404(Book, id=book_id, publisher=user)
+
+        # ลบไฟล์ cover_image ถ้ามี
+        if book.cover_image:
+            try:
+                # แปลง URL เป็น path สำหรับ Supabase
+                parsed_url = urlparse(book.cover_image)
+                file_path = parsed_url.path.replace("storage/v1/object/public/Bookhub_media/", "")  # ลบส่วนเกินออก
+                bucket_name = "Bookhub_media"  # Bucket สำหรับ cover_image
+
+                # ตรวจสอบว่า path ไม่มีส่วนที่ซ้ำซ้อนและไม่มี '/' เกินมา
+                if not file_path.startswith("covers/"):
+                    file_path = f"{file_path.lstrip('/')}"
+
+                # Debug: ตรวจสอบ path และ bucket
+                logger.info(f"Attempting to delete cover image: bucket={bucket_name}, file_path={file_path}")
+
+                response = supabase.storage.from_(bucket_name).remove([file_path])
+                if isinstance(response, list) and response and "error" in response[0]:
+                    logger.error(f"Error deleting cover image: {response[0]['error']}")
+                else:
+                    logger.info(f"Cover image deleted successfully: {file_path}")
+            except Exception as e:
+                logger.error(f"Error deleting cover image: {e}")
+
+        # ลบไฟล์ pdf_file ถ้ามี
+        if book.pdf_file:
+            try:
+                file_path = book.pdf_file.name  # ใช้ชื่อไฟล์ตรงๆ
+                bucket_name = "Bookhub_pdf"  # Bucket สำหรับ pdf_file
+
+                # Debug: ตรวจสอบ path และ bucket
+                logger.info(f"Attempting to delete PDF file: bucket={bucket_name}, file_path=pdfs/{file_path}")
+
+                response = supabase.storage.from_(bucket_name).remove([f"pdfs/{file_path}"])
+                if isinstance(response, list) and response and "error" in response[0]:
+                    logger.error(f"Error deleting PDF file: {response[0]['error']}")
+                else:
+                    logger.info(f"PDF file deleted successfully: pdfs/{file_path}")
+            except Exception as e:
+                logger.error(f"Error deleting PDF file: {e}")
+
+        # ลบหนังสือ
         book.delete()
-        return Response({"message": "Book removed successfully."},
+
+        return Response({"message": "Book and associated files removed successfully."},
                         status=status.HTTP_200_OK)
 
 class ReaderAccountView(APIView):
