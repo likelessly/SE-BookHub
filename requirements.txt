@@ -1,3 +1,4 @@
+
 ﻿asgiref==3.8.1
 Django>=4.0
 django-cors-headers==4.7.0
@@ -20,3 +21,5 @@ django-filter==23.5
 python-magic==0.4.27
 six==1.16.0
 supabase==2.15.0
+
+
