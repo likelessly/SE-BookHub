@@ -1,4 +1,3 @@
-
 # books/views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,6 +12,15 @@ from django.http import HttpResponse
 from .models import Tag
 from .serializers import TagSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.conf import settings
+from .storages import PrivateMediaStorage
+from supabase import create_client
+import logging
+
+logger = logging.getLogger(__name__)
+
+# สร้าง Supabase Client
+supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 
 def home(request):
     return HttpResponse("Welcome to Books API!")
@@ -120,7 +128,6 @@ class ReaderAccountView(APIView):
                 "role": user.profile.user_type,
                 "registered_at": user.date_joined,
                 "borrow_count": borrowed.count(),
-                "profile_image": "",  # เพิ่ม field รูปโปรไฟล์หากมี
             },
             "borrowed_books": borrow_serializer.data
         }
@@ -153,19 +160,18 @@ class ReadBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, borrow_id):
-        borrow_entry = get_object_or_404(BookBorrow, id=borrow_id, reader=request.user)
-        now = timezone.now()
-        if now > borrow_entry.due_date:
-            borrow_entry.delete()
-            return Response({"error": "Borrow period expired. This book is no longer accessible."},
-                            status=status.HTTP_403_FORBIDDEN)
-        book = borrow_entry.book
-        if not book.pdf_file:
-            return Response({"error": "PDF not available."},
+        try:
+            borrow_entry = BookBorrow.objects.get(id=borrow_id, reader=request.user)
+            if borrow_entry.due_date < timezone.now():
+                borrow_entry.returned = True
+                borrow_entry.save()
+                return Response({"error": "Borrowing period has expired."},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            # ...โค้ดสำหรับสร้าง Signed URL...
+        except BookBorrow.DoesNotExist:
+            return Response({"error": "Borrow record not found."},
                             status=status.HTTP_404_NOT_FOUND)
-        response = FileResponse(book.pdf_file.open('rb'), content_type='application/pdf')
-        response['Content-Disposition'] = 'inline; filename="{}"'.format(book.pdf_file.name)
-        return response
 
 class EditBookView(APIView):
     permission_classes = [permissions.IsAuthenticated]

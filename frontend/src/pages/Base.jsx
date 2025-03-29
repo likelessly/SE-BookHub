@@ -21,7 +21,7 @@ const Base = ({ children }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("userId");
-    navigate("/login");
+    navigate("/");
   };
 
   const handleAccountClick = (e) => {
