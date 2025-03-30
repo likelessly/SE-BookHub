@@ -88,10 +88,11 @@ class BookSerializer(serializers.ModelSerializer):
 
 class BookBorrowSerializer(serializers.ModelSerializer):
     book = BookSerializer(read_only=True)
-    book_id = serializers.PrimaryKeyRelatedField(
-        queryset=Book.objects.all(), source='book', write_only=True
-    )
+    countdown = serializers.SerializerMethodField()
 
     class Meta:
         model = BookBorrow
-        fields = ['id', 'book', 'book_id', 'borrow_date', 'due_date', 'returned_at']
+        fields = ['id', 'book', 'book_id', 'borrow_date', 'due_date', 'returned_at', 'countdown']
+
+    def get_countdown(self, obj):
+        return obj.get_countdown()

@@ -320,3 +320,26 @@ class EditBookView(APIView):
             logger.error(f"Error updating book {book_id}: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+class AccountReaderView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Check and auto-return overdue books before sending response
+            user_borrows = BookBorrow.objects.filter(
+                reader=request.user,
+                returned_at__isnull=True
+            )
+            
+            for borrow in user_borrows:
+                if borrow.is_overdue():
+                    borrow.auto_return()
+
+            # ...existing code for getting account data...
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+

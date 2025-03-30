@@ -5,6 +5,7 @@ import './Account.css';
 import { useNavigate } from 'react-router-dom';
 import { FaBook, FaCalendarAlt, FaClock, FaArrowRight, FaSpinner } from 'react-icons/fa';
 import { BiErrorCircle } from 'react-icons/bi';
+import CountdownNotification from './CountdownNotification';
 
 const AccountReader = () => {
   const [accountData, setAccountData] = useState(null);
@@ -258,6 +259,9 @@ const AccountReader = () => {
                           <span>Due:</span> 
                           {new Date(borrow.due_date).toLocaleDateString()}
                         </p>
+                        
+                        {/* Add countdown notification */}
+                        <CountdownNotification countdown={borrow.countdown} />
                       </div>
                       
                       {borrow.book.tags && borrow.book.tags.length > 0 && (
