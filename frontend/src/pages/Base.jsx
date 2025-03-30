@@ -77,12 +77,12 @@ const Base = ({ children }) => {
                 <Link to="/login" className="nav-link">Login</Link>
               </motion.div>
               <motion.div variants={linkVariants} whileHover="hover" whileTap="tap">
-                <button 
+                <Link  
                   onClick={() => setIsSignupModalOpen(true)} 
                   className="nav-link signup-button"
                 >
                   Sign Up
-                </button>
+                </Link>
               </motion.div>
             </>
           ) : (
