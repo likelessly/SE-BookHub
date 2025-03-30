@@ -1,22 +1,28 @@
 import React from 'react';
 
-const AccountStats = ({ user }) => (
-  <div className="account-stats">
-    <div className="stat-item">
-      <div className="stat-label">Joined</div>
-      <div className="stat-value">
-        {new Date(user.registered_at).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })}
-      </div>
+const AccountStats = ({ user }) => {
+  return (
+    <div className="account-stats">
+      <h2>Account Statistics</h2>
+      <p>
+        <span>Name:</span> {user.name}
+      </p>
+      <p>
+        <span>Email:</span> {user.email}
+      </p>
+      <p>
+        <span>Role:</span> {user.role}
+      </p>
+      <p>
+        <span>Total Books Borrowed:</span> {user.borrow_count}
+      </p>
+      {user.active_borrows !== undefined && (
+        <p>
+          <span>Currently Borrowing:</span> {user.active_borrows}
+        </p>
+      )}
     </div>
-    <div className="stat-item">
-      <div className="stat-label">Published Books</div>
-      <div className="stat-value">{user.book_count} books</div>
-    </div>
-  </div>
-);
+  );
+};
 
 export default AccountStats;

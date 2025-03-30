@@ -18,16 +18,18 @@ export const useBookActions = (fetchAccountData, showNotification) => {
         { headers: { Authorization: `Token ${token}` } }
       );
 
-      if (response.data.status === 'success') {
-        showNotification('success', `You have successfully returned "${bookTitle}"`);
-        // เรียก fetchAccountData เพื่ออัปเดตข้อมูล
-        fetchAccountData();
-      } else {
-        showNotification('error', response.data.message || 'Failed to return book.');
-      }
+      console.log('Return response:', response.data); // เพิ่ม log เพื่อตรวจสอบ response
+
+      // รอให้ข้อมูลถูกอัพเดทในฐานข้อมูลก่อน
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // เรียก fetchAccountData เพื่ออัพเดทข้อมูล
+      await fetchAccountData();
+      
+      showNotification('success', `You have successfully returned "${bookTitle}"`);
     } catch (error) {
+      console.error('Return error:', error); // เพิ่ม log เพื่อตรวจสอบ error
       showNotification('error', 'Unable to return the book. Please try again later.');
-      console.error(error);
     } finally {
       setReturnLoading(false);
       setReturningBookId(null);

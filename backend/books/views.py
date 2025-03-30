@@ -164,7 +164,17 @@ class ReaderAccountView(APIView):
         if hasattr(user, 'profile') and user.profile.user_type != 'reader':
             return Response({"error": "Not authorized."},
                             status=status.HTTP_403_FORBIDDEN)
-        borrowed = BookBorrow.objects.filter(reader=user)
+        
+        # เปลี่ยนจาก borrowed = BookBorrow.objects.filter(reader=user)
+        # เป็นการquery เฉพาะหนังสือที่ยังไม่ได้คืน (returned_at is None)
+        borrowed = BookBorrow.objects.filter(
+            reader=user,
+            returned_at__isnull=True  # เพิ่มเงื่อนไขนี้
+        )
+        
+        # นับจำนวนหนังสือที่ยืมทั้งหมด (รวมที่คืนแล้ว)
+        total_borrowed = BookBorrow.objects.filter(reader=user).count()
+        
         borrow_serializer = BookBorrowSerializer(borrowed, many=True)
         data = {
             "user": {
@@ -172,7 +182,8 @@ class ReaderAccountView(APIView):
                 "email": user.email,
                 "role": user.profile.user_type,
                 "registered_at": user.date_joined,
-                "borrow_count": borrowed.count(),
+                "borrow_count": total_borrowed,  # แสดงจำนวนหนังสือที่เคยยืมทั้งหมด
+                "active_borrows": borrowed.count(),  # เพิ่มจำนวนหนังสือที่ยังไม่ได้คืน
             },
             "borrowed_books": borrow_serializer.data
         }

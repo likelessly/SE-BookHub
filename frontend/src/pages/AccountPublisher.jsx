@@ -12,25 +12,24 @@ import PublishedBookItem from '../components/PublishedBookItem';
 import AddBookModal from '../components/AddBookModal';
 import TagModal from '../components/TagModal';
 import NotificationBar from '../components/NotificationBar';
-import axios from 'axios';
 import './Account.css';
+import axios from 'axios';
 
 const AccountPublisher = () => {
-  // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
   const { accountData, loading, error, fetchAccountData } = useAccount('publisher');
   const { notification, showNotification } = useNotification();
 
   const [showAddBookModal, setShowAddBookModal] = useState(false);
+  const [showTagModal, setShowTagModal] = useState(false);
   const closeModal = useCallback(() => {
     setShowAddBookModal(false);
     setShowTagModal(false);
   }, []);
-  const { newBook, setNewBook, handleAddBookSubmit } = useAddBook(fetchAccountData, showNotification, closeModal);
 
+  const { newBook, setNewBook, handleAddBookSubmit } = useAddBook(fetchAccountData, showNotification, closeModal);
   const { availableTags, fetchAvailableTags, handleTagSelection, handleCustomTagChange, handleRemoveTag } = useTagManagement(showNotification, setNewBook);
   const { handleImageUpload, handlePDFUpload } = useFileUpload(showNotification, setNewBook);
-  const [showTagModal, setShowTagModal] = useState(false);
 
   const openTagModal = useCallback(() => {
     fetchAvailableTags();
@@ -39,7 +38,7 @@ const AccountPublisher = () => {
 
   const handleRemoveBook = useCallback((bookId, bookTitle) => {
     if (window.confirm(`Are you sure you want to remove "${bookTitle}"?`)) {
-      axios.delete(`http://127.0.0.1:8000/api/books/delete/${bookId}/`, {
+      axios.delete(`http://127.0.0.1:8000/api/books/remove/${bookId}/`, {
         headers: { Authorization: `Token ${localStorage.getItem('token')}` },
       })
       .then(response => {

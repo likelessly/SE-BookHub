@@ -8,7 +8,6 @@ const MainPage = () => {
   const [books, setBooks] = useState([]);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [tags, setTags] = useState([]);
   const [user, setUser] = useState(null);
@@ -79,10 +78,18 @@ const MainPage = () => {
 
   // ฟังก์ชันกรองหนังสือตาม search query และ selected tags
   const filteredBooks = books.filter(book => {
-    const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase());
+    // กรองตามการค้นหา
+    const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // กรองตาม tags ที่เลือก
     const matchesTags = selectedTags.length === 0 ||
       (book.tags && selectedTags.every(tag => book.tags.includes(tag)));
-    return matchesSearch && matchesTags;
+    
+    // กรองตามสถานะการมีให้ยืม
+    const matchesAvailability = filterBy === 'all' || 
+      (filterBy === 'available' && book.remaining_borrows > 0);
+
+    return matchesSearch && matchesTags && matchesAvailability;
   });
 
   // Add tag management functions
@@ -95,8 +102,9 @@ const MainPage = () => {
   };
 
   const clearFilters = () => {
-    setSearchQuery('');
+    setSearchTerm('');
     setSelectedTags([]);
+    setFilterBy('all');
   };
 
   return (
@@ -241,7 +249,7 @@ const MainPage = () => {
               <div className="no-results">
                 <img src="/no-result.png" alt="No books found" />
                 <p>No books match your search criteria.</p>
-                <button onClick={() => { setSearchQuery(''); setSelectedTags([]); }}>Clear Filters</button>
+                <button onClick={() => { setSearchTerm(''); setSelectedTags([]); }}>Clear Filters</button>
               </div>
             )}
           </div>

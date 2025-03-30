@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// eslint-disable-next-line no-unused-vars
 const AccountActions = ({ role, setShowAddBookModal }) => {
   const navigate = useNavigate();
 
@@ -13,12 +12,15 @@ const AccountActions = ({ role, setShowAddBookModal }) => {
 
   return (
     <div className="account-actions">
-      <button
-        className="account-button primary"
-        onClick={() => setShowAddBookModal(true)}
-      >
-        Add New Book
-      </button>
+      {/* แสดงปุ่ม Add New Book เฉพาะ Publisher */}
+      {role === 'publisher' && (
+        <button
+          className="account-button primary"
+          onClick={() => setShowAddBookModal(true)}
+        >
+          Add New Book
+        </button>
+      )}
       <button className="account-button secondary" onClick={() => navigate('/main')}>
         Browse Books
       </button>
