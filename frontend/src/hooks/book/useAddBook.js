@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { uploadImage } from '../api';
+import { uploadImage } from '../../api';
 
 export const useAddBook = (fetchAccountData, showNotification, closeModal) => {
   const [newBook, setNewBook] = useState({

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaBook, FaCalendarAlt, FaClock, FaArrowRight, FaSpinner } from 'react-icons/fa';
-import CountdownNotification from '../pages/CountdownNotification';
+import CountdownNotification from '../../pages/CountdownNotification';
 
 const BorrowedBookItem = ({ borrow, handleReturn, returnLoading, returningBookId, navigate }) => {
   const calculateDaysRemaining = (dueDate) => {

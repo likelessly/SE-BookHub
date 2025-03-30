@@ -1,14 +1,14 @@
 // src/pages/AccountReader.jsx
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAccount } from '../hooks/useAccount';
-import { useNotification } from '../hooks/useNotification';
-import { useBookActions } from '../hooks/useBookActions';
-import ProfileHeader from '../components/ProfileHeader';
-import AccountStats from '../components/AccountStats';
-import BorrowedBookItem from '../components/BorrowedBookItem';
-import NotificationBar from '../components/NotificationBar';
-import AccountActions from '../components/AccountActions'; // Import AccountActions
+import { useAccount } from '../hooks/account/useAccount';
+import { useNotification } from '../hooks/notifications/useNotification';
+import { useBookActions } from '../hooks/book/useBookActions';
+import ProfileHeader from '../components/account/ProfileHeader';
+import AccountStats from '../components/account/AccountStats';
+import BorrowedBookItem from '../components/book/BorrowedBookItem';
+import NotificationBar from '../components/notifications/NotificationBar';
+import AccountActions from '../components/account/AccountActions'; // Import AccountActions
 import './Account.css';
 
 const AccountReader = () => {

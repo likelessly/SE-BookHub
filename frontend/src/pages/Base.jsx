@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
-import SignupModal from "../components/SignupModal";
+import SignupModal from "../components/account/SignupModal";
 import "./Base.css";
 
 const Base = ({ children }) => {

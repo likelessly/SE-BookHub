@@ -1,21 +1,22 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAccount } from '../hooks/useAccount';
-import { useNotification } from '../hooks/useNotification';
-import { useAddBook } from '../hooks/useAddBook';
-import { useTagManagement } from '../hooks/useTagManagement';
-import { useFileUpload } from '../hooks/useFileUpload';
-import ProfileHeader from '../components/ProfileHeader';
-import AccountStats from '../components/AccountStats';
-import AccountActions from '../components/AccountActions';
-import PublishedBookItem from '../components/PublishedBookItem';
-import AddBookModal from '../components/AddBookModal';
-import TagModal from '../components/TagModal';
-import NotificationBar from '../components/NotificationBar';
+import { useAccount } from '../hooks/account/useAccount';
+import { useNotification } from '../hooks/notifications/useNotification';
+import { useAddBook } from '../hooks/book/useAddBook';
+import { useTagManagement } from '../hooks/book/useTagManagement';
+import { useFileUpload } from '../hooks/account/useFileUpload';
+import ProfileHeader from '../components/account/ProfileHeader';
+import AccountStats from '../components/account/AccountStats';
+import AccountActions from '../components/account/AccountActions';
+import PublishedBookItem from '../components/account/PublishedBookItem';
+import AddBookModal from '../components/book/AddBookModal';
+import TagModal from '../components/book/TagModal';
+import NotificationBar from '../components/notifications/NotificationBar';
 import './Account.css';
 import axios from 'axios';
 
 const AccountPublisher = () => {
+  // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
   const { accountData, loading, error, fetchAccountData } = useAccount('publisher');
   const { notification, showNotification } = useNotification();
