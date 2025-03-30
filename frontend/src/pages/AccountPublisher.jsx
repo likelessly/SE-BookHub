@@ -29,7 +29,7 @@ const AccountPublisher = () => {
   }, []);
 
   const { newBook, setNewBook, handleAddBookSubmit } = useAddBook(fetchAccountData, showNotification, closeModal);
-  const { availableTags, fetchAvailableTags, handleTagSelection, handleCustomTagChange, handleRemoveTag } = useTagManagement(showNotification, setNewBook);
+  const { availableTags, fetchAvailableTags, handleCustomTagChange, handleRemoveTag } = useTagManagement(showNotification, setNewBook);
   const { handleImageUpload, handlePDFUpload } = useFileUpload(showNotification, setNewBook);
 
   const openTagModal = useCallback(() => {
@@ -53,6 +53,31 @@ const AccountPublisher = () => {
       });
     }
   }, [fetchAccountData, showNotification]);
+
+  const handleTagSelection = (tagName) => {
+    setNewBook(prev => {
+      const currentTags = prev.selectedTags || [];
+      
+      if (currentTags.includes(tagName)) {
+        // Remove tag if already selected
+        return {
+          ...prev,
+          selectedTags: currentTags.filter(t => t !== tagName)
+        };
+      }
+      
+      if (currentTags.length >= 3) {
+        showNotification('warning', 'สามารถเลือกได้สูงสุด 3 แท็ก');
+        return prev;
+      }
+
+      // Add new tag
+      return {
+        ...prev,
+        selectedTags: [...currentTags, tagName]
+      };
+    });
+  };
 
   if (loading) return <div className="loading-container">Loading...</div>;
   if (error) return <div className="error-container">Error: {error}</div>;
@@ -105,6 +130,7 @@ const AccountPublisher = () => {
       {showTagModal && (
         <TagModal
           availableTags={availableTags}
+          selectedTags={newBook.selectedTags}
           handleTagSelection={handleTagSelection}
           closeModal={() => setShowTagModal(false)}
         />

@@ -2,8 +2,8 @@
   max-width: 900px;
   margin: 20px auto;
   padding: 30px;
-  background-color: #121212;
-  border-radius: 8px;
+  background-color: #1a1a1a;
+  border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   color: #e0e0e0;
 }
@@ -21,9 +21,9 @@
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 600;
+  margin-bottom: 10px;
+  color: #e0e0e0;
+  font-weight: 500;
 }
 
 .form-group input[type="text"],
@@ -31,16 +31,18 @@
 .form-group textarea {
   width: 100%;
   padding: 12px;
-  border: 2px solid #ddd;
+  border: 1px solid #333;
   border-radius: 8px;
   font-size: 1rem;
-  color: #333;
-  background-color: white;
+  color: #e0e0e0;
+  background-color: #242424;
+  transition: all 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   border-color: #ff6b00;
+  box-shadow: 0 0 0 2px rgba(255, 107, 0, 0.2);
   outline: none;
 }
 
@@ -63,12 +65,13 @@
 }
 
 .current-pdf {
-  color: #666;
+  color: #ffffff;
   margin-top: 8px;
   font-style: italic;
   padding: 8px;
-  background-color: #f8f8f8;
+  background-color: #1a1a1a;
   border-radius: 4px;
+  border: 1px solid #333;
 }
 
 .form-actions {
@@ -77,20 +80,16 @@
   margin-top: 32px;
 }
 
-.save-button,
-.cancel-button {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
 .save-button {
   background-color: #ff6b00;
   color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
 }
 
 .save-button:hover {
@@ -100,6 +99,13 @@
 .cancel-button {
   background-color: #333;
   color: #e0e0e0;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
 }
 
 .cancel-button:hover {
@@ -109,7 +115,7 @@
 .loading {
   text-align: center;
   padding: 40px;
-  color: #333;
+  color: #ff6b00;
 }
 
 .error {
@@ -122,10 +128,11 @@
 }
 
 .tag-section {
-  background-color: #f8f8f8;
+  background-color: #1a1a1a;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 30px;
+  border: 1px solid #333;
 }
 
 .tag-controls {
@@ -135,16 +142,20 @@
 }
 
 .show-tags-button {
-  padding: 10px 20px;
-  background-color: #333;
+  background-color: #ff6b00;
   color: white;
+  padding: 10px 20px;
   border: none;
   border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .show-tags-button:hover {
-  background-color: #444;
+  background-color: #ff8533;
 }
 
 .custom-tag-input {
@@ -186,9 +197,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  background-color: #333;
-  color: #ff6b00;
+  padding: 8px 16px;
+  background-color: #ff6b00;
+  color: white;
   border-radius: 20px;
   font-size: 0.9rem;
 }
@@ -196,17 +207,18 @@
 .remove-tag {
   background: none;
   border: none;
-  color: #ff6b00;
+  color: white;
   cursor: pointer;
   font-size: 18px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.7;
 }
 
 .remove-tag:hover {
-  color: #ff8533;
+  opacity: 1;
 }
 
 .modal {
@@ -223,17 +235,18 @@
 }
 
 .modal-content {
-  background-color: white;
+  background-color: #000000;
   padding: 30px;
   border-radius: 12px;
   max-width: 500px;
   width: 90%;
   max-height: 80vh;
   overflow-y: auto;
+  border: 1px solid #333;
 }
 
 .modal-content h3 {
-  color: #333;
+  color: #ff6b00;
   margin-bottom: 20px;
   font-size: 1.5rem;
 }
@@ -250,10 +263,10 @@
   align-items: center;
   gap: 8px;
   padding: 10px;
-  border: 2px solid #ddd;
   border-radius: 6px;
   cursor: pointer;
-  color: #333;
+  color: #ffffff;
+  background-color: #ffffff;
 }
 
 .tag-checkbox:hover {
@@ -287,15 +300,17 @@
 /* File input styling */
 input[type="file"] {
   padding: 10px;
-  border: 2px dashed #ddd;
+  border: 2px dashed #333;
   border-radius: 6px;
   width: 100%;
   cursor: pointer;
   margin-top: 8px;
+  background-color: #242424;
 }
 
 input[type="file"]:hover {
   border-color: #ff6b00;
+  background-color: #2a2a2a;
 }
 
 /* Cover Image Section */
@@ -459,11 +474,34 @@ input[type="file"]:hover {
 }
 
 .success-popup-content {
-  background-color: #1e1e1e;
+  background-color: #000000;
   padding: 20px 40px;
   border-radius: 8px;
   font-size: 1.2rem;
-  color: #e0e0e0;
+  color: #ffffff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  border-left: 4px solid #4caf50;
+  border-left: 4px solid #ff6b00;
+}
+
+/* Loading and error states */
+.error-container {
+  background-color: #000000;
+  color: #ff6b00;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.back-button {
+  background-color: #ff6b00;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.back-button:hover {
+  background-color: #ff8533;
 }

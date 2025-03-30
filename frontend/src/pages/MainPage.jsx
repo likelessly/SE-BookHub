@@ -19,6 +19,8 @@ const MainPage = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    
     if (!token) {
       setError('Unauthorized. Please login.');
       setLoading(false);
@@ -31,49 +33,43 @@ const MainPage = () => {
       return response;
     };
 
-    // ดึงข้อมูลหนังสือทั้งหมด
-    axios.get('http://127.0.0.1:8000/api/books/', {
-      headers: { Authorization: `Token ${token}` },
-    })
-      .then(response => logResponse('Books', response))
-      .then(response => setBooks(response.data))
-      .catch(err => {
-        console.error("Error fetching books:", err);
-        setError('Failed to load books. Please try again later.');
+    // ดึงข้อมูลหนังสือและแท็ก
+    Promise.all([
+      axios.get('http://127.0.0.1:8000/api/books/', {
+        headers: { Authorization: `Token ${token}` }
+      }),
+      axios.get('http://127.0.0.1:8000/api/tags/', {
+        headers: { Authorization: `Token ${token}` }
       })
-      .finally(() => setLoading(false));
-
-    // ดึงข้อมูลแท็กทั้งหมดจาก Database
-    axios.get('http://127.0.0.1:8000/api/tags/', {
-      headers: { Authorization: `Token ${token}` },
+    ])
+    .then(([booksResponse, tagsResponse]) => {
+      setBooks(booksResponse.data);
+      setTags(tagsResponse.data);
     })
-      .then(response => logResponse('Tags', response))
-      .then(response => setTags(response.data))
-      .catch(err => console.error("Error fetching tags:", err));
+    .catch(err => {
+      console.error("Error fetching data:", err);
+      setError('Failed to load data. Please try again later.');
+    })
+    .finally(() => setLoading(false));
+
+    // เลือก endpoint ตาม role
+    const userEndpoint = role === 'publisher' 
+      ? 'http://127.0.0.1:8000/api/account/publisher/'
+      : 'http://127.0.0.1:8000/api/account/reader/';
 
     // ดึงข้อมูลผู้ใช้
-    axios.get('http://127.0.0.1:8000/api/account/reader/', {
-      headers: { Authorization: `Token ${token}` },
+    axios.get(userEndpoint, {
+      headers: { Authorization: `Token ${token}` }
     })
       .then(response => logResponse('User', response))
       .then(response => {
-        // Fix: Store just the user object from the response
-        // The API returns { user: {...}, borrowed_books: [...] }
         setUser(response.data.user);
       })
       .catch(err => {
         console.error("Error fetching user info:", err);
-        // Try alternative user info endpoint
-        const role = localStorage.getItem('role');
-        if (role === 'publisher') {
-          axios.get('http://127.0.0.1:8000/api/account/publisher/', {
-            headers: { Authorization: `Token ${token}` },
-          })
-            .then(response => logResponse('Publisher', response))
-            .then(response => setUser(response.data.user))
-            .catch(err => console.error("Error fetching publisher info:", err));
-        }
+        setError('Failed to load user info');
       });
+
   }, []);
 
   // ฟังก์ชันกรองหนังสือตาม search query และ selected tags
@@ -127,20 +123,16 @@ const MainPage = () => {
           </div>
           <div className="tags-container">
             {tags.map(tag => (
-              <div key={tag.id} className="tag-option">
-                <label className="tag-checkbox">
-                  <input
-                    type="checkbox"
-                    value={tag.name}
-                    checked={selectedTags.includes(tag.name)}
-                    onChange={() => handleTagSelect(tag.name)}
-                  />
-                  <span className="tag-name">{tag.name}</span>
-                  <span className="tag-count">
-                    {books.filter(book => book.tags?.includes(tag.name)).length}
-                  </span>
-                </label>
-              </div>
+              <button
+                key={tag.id}
+                className={`tag-button ${selectedTags.includes(tag.name) ? 'selected' : ''}`}
+                onClick={() => handleTagSelect(tag.name)}
+              >
+                <span className="tag-name">{tag.name}</span>
+                <span className="tag-count">
+                  {books.filter(book => book.tags?.includes(tag.name)).length}
+                </span>
+              </button>
             ))}
           </div>
         </div>
