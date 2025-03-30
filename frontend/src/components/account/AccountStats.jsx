@@ -24,10 +24,17 @@ const AccountStats = ({ user }) => {
           <>
             <div className="stat-item">
               <span className="stat-label">
+                <FaBookReader /> Books Borrowed:
+              </span>
+              <span className="stat-value">{user?.borrow_count || 0}</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">
                 <FaBookReader /> Currently Borrowing:
               </span>
               <span className="stat-value">{user?.active_borrows || 0}</span>
             </div>
+            
           </>
         ) : (
           <div className="stat-item">
