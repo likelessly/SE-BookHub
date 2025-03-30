@@ -1,15 +1,16 @@
 // src/pages/ReadBook.jsx
 import React, { useEffect, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import './ReadBook.css';
 
 // Set worker source using the same version as pdfjs-dist
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
-const ReadBook = ({ borrowId }) => {
+const ReadBook = () => {
+  const { borrowId } = useParams();
   const navigate = useNavigate();
   const [pdfUrl, setPdfUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
