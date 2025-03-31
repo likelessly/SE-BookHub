@@ -160,31 +160,45 @@ class ForgotPasswordView(APIView):
             # Create password reset token
             reset_token = PasswordReset.objects.create(user=user)
             
-            # Create reset link
-            reset_url = f"{settings.FRONTEND_URL}/reset-password/{reset_token.token}"
+            # Get frontend URL from settings
+            frontend_url = settings.FRONTEND_URL.rstrip('/')
+            reset_url = f"{frontend_url}/reset-password/{reset_token.token}"
             
-            # Send email
+            # Send email with HTML template
             subject = 'Reset Your BookHub Password'
-            message = f'''
-            Hello {user.username},
-
-            Click the link below to reset your password:
-            {reset_url}
-
-            This link will expire in 24 hours.
-
-            If you didn't request this, please ignore this email.
-
-            Best regards,
-            BookHub Team
-            '''
+            html_message = f"""
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #ff6b00;">BookHub Password Reset</h2>
+                <p>Hello {user.username},</p>
+                <p>We received a request to reset your password. Click the button below to set a new password:</p>
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="{reset_url}" 
+                       style="background-color: #ff6b00; 
+                              color: white; 
+                              padding: 12px 24px; 
+                              text-decoration: none; 
+                              border-radius: 4px;
+                              display: inline-block;">
+                        Reset Password
+                    </a>
+                </div>
+                <p>This link will expire in 24 hours.</p>
+                <p>If you didn't request this, please ignore this email.</p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                <p style="color: #666; font-size: 12px;">
+                    Best regards,<br>
+                    BookHub Team
+                </p>
+            </div>
+            """
             
             send_mail(
                 subject,
-                message,
+                "Please use an HTML-compatible email client to view this message.",
                 'bookhub.noreply@gmail.com',
                 [email],
                 fail_silently=False,
+                html_message=html_message
             )
             
             return Response({"message": "Password reset link sent to your email."})

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaLock } from 'react-icons/fa';
 import './Auth.css';
@@ -13,6 +13,38 @@ const ResetPassword = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [tokenValid, setTokenValid] = useState(true);
+
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        await axios.get(`http://127.0.0.1:8000/api/reset-password/${token}/validate/`);
+      // eslint-disable-next-line no-unused-vars
+      } catch (err) {
+        setTokenValid(false);
+        setError('This password reset link has expired or is invalid.');
+      }
+    };
+    checkToken();
+  }, [token]);
+
+  if (!tokenValid) {
+    return (
+      <div className="login-container">
+        <div className="login-form-container">
+          <div className="login-right">
+            <div className="login-form-header">
+              <h2>Link Expired</h2>
+              <p>This password reset link has expired or is invalid.</p>
+            </div>
+            <Link to="/forgot-password" className="login-button">
+              Request New Reset Link
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
