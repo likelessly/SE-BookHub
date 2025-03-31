@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { getAuthData } from '../utils/authUtils';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import './ReadBook.css';
 
@@ -31,7 +32,7 @@ const ReadBook = () => {
           return;
         }
 
-        const token = localStorage.getItem('token');
+        const { token } = getAuthData();
         if (!token) {
           navigate('/login', { state: { from: `/read/${borrowId}` } });
           return;

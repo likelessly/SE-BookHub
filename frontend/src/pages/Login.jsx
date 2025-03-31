@@ -5,12 +5,14 @@ import axios from 'axios';
 import './Auth.css';
 import SignupModal from "../components/account/SignupModal";
 import { FaUser, FaLock, FaBook, FaGoogle } from 'react-icons/fa';
+import { saveAuthData, clearAuthData } from '../utils/authUtils';
 
 const Login = () => {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
 
@@ -20,16 +22,16 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login/', { identifier, password });
+      const response = await axios.post('http://127.0.0.1:8000/api/login/', { 
+        identifier, 
+        password,
+        remember_me: rememberMe 
+      });
 
-      // Get token and user info
-      const { token, role } = response.data;
-      const userId = response.data.userId || '1'; // Get userId from response or use default
-
-      // Store in localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', role);
-      localStorage.setItem('userId', userId);
+      const { token, role, userId } = response.data;
+      
+      // Save auth data based on remember me choice
+      saveAuthData({ token, role, userId }, rememberMe);
 
       // Navigate based on role
       if (role === 'reader') {
@@ -41,6 +43,7 @@ const Login = () => {
       }
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+      clearAuthData(); // Clear any existing auth data on error
     } finally {
       setLoading(false);
     }
@@ -161,7 +164,13 @@ const Login = () => {
 
             <div className="form-options">
               <div className="remember-me">
-                <input type="checkbox" id="remember" />
+                <input 
+                  type="checkbox" 
+                  id="remember" 
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  disabled={loading}
+                />
                 <label htmlFor="remember">Remember me</label>
               </div>
               <Link to="/forgot-password" className="forgot-password">Forgot password?</Link>

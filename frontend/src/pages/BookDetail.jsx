@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import { getAuthData } from '../utils/authUtils';
 import './BookDetail.css';
 
 const BookDetail = () => {
@@ -11,12 +12,17 @@ const BookDetail = () => {
   const [borrowing, setBorrowing] = useState(false);
   const [notification, setNotification] = useState({ show: false, type: '', message: '' });
   const navigate = useNavigate();
-  const role = localStorage.getItem('role');
-  const token = localStorage.getItem('token');
+  
+  // Get auth data from both storages
+  const { token, role } = getAuthData();
 
   useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
     fetchBookDetails();
-  }, [bookId]);
+  }, [bookId, token, navigate]);
 
   const fetchBookDetails = () => {
     axios
@@ -29,6 +35,9 @@ const BookDetail = () => {
       })
       .catch((err) => {
         console.error('Error fetching book details:', err);
+        if (err.response?.status === 401) {
+          navigate('/login');
+        }
         setError('Failed to load book details.');
         setLoading(false);
       });
@@ -56,14 +65,10 @@ const BookDetail = () => {
       )
       .then((response) => {
         showNotification('success', 'Book borrowed successfully!');
-        
-        // Update local state to reflect the new borrowed status
         setBook({
           ...book,
           remaining_borrows: book.remaining_borrows - 1
         });
-        
-        // Redirect after a short delay to allow the user to see the success message
         setTimeout(() => {
           navigate(`/account/reader/${response.data.user_id}`);
         }, 1500);
@@ -78,26 +83,31 @@ const BookDetail = () => {
       });
   };
 
+  const handleRemoveBook = () => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    axios
+      .delete(`http://127.0.0.1:8000/api/books/remove/${bookId}/`, {
+        headers: { Authorization: `Token ${token}` },
+      })
+      .then(() => {
+        showNotification('success', 'Book removed successfully!');
+        setTimeout(() => navigate('/account/publisher'), 1500);
+      })
+      .catch((err) => {
+        console.error('Error removing book:', err.response?.data);
+        showNotification('error', 'Failed to remove book.');
+      });
+  };
+
   const showNotification = (type, message) => {
     setNotification({ show: true, type, message });
     setTimeout(() => {
       setNotification({ show: false, type: '', message: '' });
     }, 3000);
-  };
-
-  const handleRemoveBook = () => {
-    axios
-      .delete(`http://127.0.0.1:8000/api/books/remove/${bookId}/`, {
-        headers: { Authorization: `Token ${localStorage.getItem('token')}` },
-      })
-      .then(() => {
-        alert('Book removed successfully!');
-        navigate('/account/publisher');
-      })
-      .catch((err) => {
-        console.error('Error removing book:', err.response?.data);
-        alert('Failed to remove book.');
-      });
   };
 
   const handleEditBook = () => {
