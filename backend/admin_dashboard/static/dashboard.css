@@ -837,6 +837,3 @@ header {
   color: #888;
   font-size: 0.9em;
 }
-
-/* Add this to the existing script section */
-setupSearch('tagSearch', 'tagsTable');

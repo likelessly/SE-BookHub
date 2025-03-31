@@ -60,6 +60,16 @@ const ReadBook = () => {
     fetchSignedUrl();
   }, [borrowId, navigate]);
 
+  useEffect(() => {
+    const handleCopy = (e) => {
+      e.preventDefault();
+      alert('Copying is disabled for security reasons.');
+    };
+
+    document.addEventListener('copy', handleCopy);
+    return () => document.removeEventListener('copy', handleCopy);
+  }, []);
+
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
     setCurrentPage(1); // Reset to the first page when a new document is loaded

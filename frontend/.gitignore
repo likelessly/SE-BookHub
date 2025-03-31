@@ -16,6 +16,13 @@ backend/.env
 .env.test
 .env.production
 
+# Add these sensitive files
+.env*
+!.env.example
+*.key
+*.pem
+*_rsa
+
 # Python cache files
 admin_dashboard/__pycache__/
 bookhub/__pycache__/
