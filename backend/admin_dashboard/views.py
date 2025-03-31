@@ -45,12 +45,55 @@ def approve_publisher(request, user_id):
     publisher = get_object_or_404(User, id=user_id, profile__user_type='publisher', is_active=False)
     publisher.is_active = True
     publisher.save()
+
+    html_message = f"""
+    <div style="font-family: 'Prompt', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #ff6b00; margin-bottom: 15px; font-size: 28px;">BookHub</h1>
+            <div style="width: 50px; height: 3px; background-color: #ff6b00; margin: 0 auto 20px;"></div>
+            <h2 style="color: #333; font-size: 24px; margin-bottom: 10px;">การลงทะเบียนได้รับการอนุมัติแล้ว</h2>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <p style="color: #333; font-size: 16px; margin-bottom: 15px;">สวัสดีคุณ {publisher.username},</p>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                ยินดีด้วย! การลงทะเบียนผู้พิมพ์ของคุณได้รับการอนุมัติแล้ว 
+                ตอนนี้คุณสามารถเข้าสู่ระบบและเริ่มเพิ่มหนังสือของคุณได้
+            </p>
+        </div>
+
+        <div style="text-align: center; margin: 35px 0;">
+            <a href="https://se-bookhub.vercel.app/login" 
+               style="background-color: #ff6b00; 
+                      color: white; 
+                      padding: 15px 30px; 
+                      text-decoration: none; 
+                      border-radius: 5px;
+                      display: inline-block;
+                      font-weight: bold;
+                      font-size: 16px;">
+                เข้าสู่ระบบ
+            </a>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+        <div style="text-align: center;">
+            <p style="color: #666; font-size: 14px; margin: 5px 0;">
+                ขอแสดงความนับถือ<br>
+                <strong style="color: #ff6b00;">ทีมงาน BookHub</strong>
+            </p>
+        </div>
+    </div>
+    """
+
     send_mail(
-         'Publisher Registration Approved',
-         'Your publisher registration has been approved by admin.',
-         'noreply@bookhub.com',
-         [publisher.email],
-         fail_silently=True,
+        '✨ ยินดีด้วย! การลงทะเบียนของคุณได้รับการอนุมัติแล้ว',
+        'การลงทะเบียนผู้พิมพ์ของคุณได้รับการอนุมัติแล้ว',
+        'BookHub <bookhub.noreply@gmail.com>',
+        [publisher.email],
+        fail_silently=False,
+        html_message=html_message
     )
     messages.success(request, f"Publisher {publisher.email} approved.")
     return redirect('admin_dashboard')
@@ -61,13 +104,50 @@ def approve_publisher(request, user_id):
 def reject_publisher(request, user_id):
     publisher = get_object_or_404(User, id=user_id, profile__user_type='publisher', is_active=False)
     publisher_email = publisher.email
+    username = publisher.username
+
+    html_message = f"""
+    <div style="font-family: 'Prompt', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #ff6b00; margin-bottom: 15px; font-size: 28px;">BookHub</h1>
+            <div style="width: 50px; height: 3px; background-color: #ff6b00; margin: 0 auto 20px;"></div>
+            <h2 style="color: #333; font-size: 24px; margin-bottom: 10px;">ผลการพิจารณาการลงทะเบียน</h2>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+            <p style="color: #333; font-size: 16px; margin-bottom: 15px;">สวัสดีคุณ {username},</p>
+            <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                ขออภัย การลงทะเบียนผู้พิมพ์ของคุณไม่ผ่านการพิจารณา 
+                หากคุณมีข้อสงสัยเพิ่มเติม สามารถติดต่อเราได้ที่อีเมล support@bookhub.com
+            </p>
+        </div>
+
+        <div style="background-color: #fff3e0; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ff9800;">
+            <p style="color: #e65100; margin: 0; font-size: 14px;">
+                <strong>หมายเหตุ:</strong><br>
+                คุณสามารถลงทะเบียนใหม่ได้หลังจาก 30 วัน โดยกรุณาตรวจสอบและปรับปรุงข้อมูลให้ครบถ้วน
+            </p>
+        </div>
+
+        <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+        <div style="text-align: center;">
+            <p style="color: #666; font-size: 14px; margin: 5px 0;">
+                ขอแสดงความนับถือ<br>
+                <strong style="color: #ff6b00;">ทีมงาน BookHub</strong>
+            </p>
+        </div>
+    </div>
+    """
+
     publisher.delete()
     send_mail(
-         'Publisher Registration Rejected',
-         'Your publisher registration has been rejected by admin.',
-         'noreply@bookhub.com',
-         [publisher_email],
-         fail_silently=True,
+        'การลงทะเบียนของคุณไม่ผ่านการพิจารณา',
+        'ขออภัย การลงทะเบียนผู้พิมพ์ของคุณไม่ผ่านการพิจารณา',
+        'BookHub <bookhub.noreply@gmail.com>',
+        [publisher_email],
+        fail_silently=False,
+        html_message=html_message
     )
     messages.success(request, f"Publisher {publisher_email} rejected and removed.")
     return redirect('admin_dashboard')
