@@ -54,5 +54,6 @@ class PasswordReset(models.Model):
     is_used = models.BooleanField(default=False)
 
     def is_valid(self):
-        """Check if token is still valid (24 hours)"""
-        return not self.is_used and self.created_at > timezone.now() - timedelta(hours=24)
+        """Check if the reset token is still valid (24 hours)"""
+        expiration_time = self.created_at + timedelta(hours=24)
+        return not self.is_used and timezone.now() <= expiration_time
