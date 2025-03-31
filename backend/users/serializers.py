@@ -66,12 +66,55 @@ class SignupReaderSerializer(serializers.ModelSerializer):
     def _send_verification_email(self, email, verification_code):
         """Helper method to send verification email"""
         try:
+            html_message = f"""
+            <div style="font-family: 'Prompt', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #ff6b00; margin-bottom: 15px; font-size: 28px;">BookHub</h1>
+                    <div style="width: 50px; height: 3px; background-color: #ff6b00; margin: 0 auto 20px;"></div>
+                    <h2 style="color: #333; font-size: 24px; margin-bottom: 10px;">ยืนยันอีเมลของคุณ</h2>
+                </div>
+                
+                <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+                    <p style="color: #333; font-size: 16px; margin-bottom: 15px;">ยินดีต้อนรับสู่ BookHub!</p>
+                    <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                        กรุณาใช้รหัสยืนยันด้านล่างเพื่อยืนยันอีเมลของคุณ
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin: 35px 0;">
+                    <div style="background-color: #f0f0f0; padding: 20px; border-radius: 8px; display: inline-block;">
+                        <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #ff6b00;">
+                            {verification_code}
+                        </span>
+                    </div>
+                </div>
+
+                <div style="background-color: #fff3e0; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ff9800;">
+                    <p style="color: #e65100; margin: 0; font-size: 14px;">
+                        <strong>⚠️ หมายเหตุ:</strong><br>
+                        • รหัสยืนยันนี้จะหมดอายุใน 30 นาที<br>
+                        • หากคุณไม่ได้เป็นผู้ลงทะเบียน กรุณาละเว้นอีเมลนี้
+                    </p>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+                <div style="text-align: center;">
+                    <p style="color: #666; font-size: 14px; margin: 5px 0;">
+                        ขอแสดงความนับถือ<br>
+                        <strong style="color: #ff6b00;">ทีมงาน BookHub</strong>
+                    </p>
+                </div>
+            </div>
+            """
+
             send_mail(
-                'Your Verification Code',
-                f'Your verification code is: {verification_code}',
-                'bookhub.noreply@gmail.com',  # อีเมล Gmail ของคุณ
+                '✨ ยินดีต้อนรับสู่ BookHub - ยืนยันอีเมลของคุณ',
+                f'รหัสยืนยันของคุณคือ: {verification_code}',
+                'BookHub <bookhub.noreply@gmail.com>',
                 [email],
                 fail_silently=False,
+                html_message=html_message
             )
         except Exception as e:
             raise serializers.ValidationError(f"Failed to send verification email: {str(e)}")
@@ -152,12 +195,53 @@ class SignupPublisherSerializer(serializers.Serializer):
     def _send_admin_notification(self, publisher_email):
         """Helper method to send admin notification"""
         try:
+            html_message = f"""
+            <div style="font-family: 'Prompt', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="color: #ff6b00; margin-bottom: 15px; font-size: 28px;">BookHub</h1>
+                    <div style="width: 50px; height: 3px; background-color: #ff6b00; margin: 0 auto 20px;"></div>
+                    <h2 style="color: #333; font-size: 24px; margin-bottom: 10px;">มีการลงทะเบียนผู้พิมพ์ใหม่</h2>
+                </div>
+                
+                <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px;">
+                    <p style="color: #333; font-size: 16px; line-height: 1.6;">
+                        มีการลงทะเบียนผู้พิมพ์ใหม่ที่รอการอนุมัติ:<br>
+                        <strong>อีเมล:</strong> {publisher_email}
+                    </p>
+                </div>
+
+                <div style="text-align: center; margin: 35px 0;">
+                    <a href="https://se-bookhub-be.onrender.com/admin" 
+                       style="background-color: #ff6b00; 
+                              color: white; 
+                              padding: 15px 30px; 
+                              text-decoration: none; 
+                              border-radius: 5px;
+                              display: inline-block;
+                              font-weight: bold;
+                              font-size: 16px;">
+                        ไปที่หน้า Admin
+                    </a>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+
+                <div style="text-align: center;">
+                    <p style="color: #666; font-size: 14px; margin: 5px 0;">
+                        ขอแสดงความนับถือ<br>
+                        <strong style="color: #ff6b00;">ระบบ BookHub</strong>
+                    </p>
+                </div>
+            </div>
+            """
+
             send_mail(
-                'New Publisher Signup',
-                f'A new publisher has registered with email: {publisher_email}. Please review and activate the account.',
-                'bookhub.noreply@gmail.com',  # อีเมล Gmail ของคุณ
-                ['s6604062630099@email.kmutnb.ac.th'],  # อีเมลผู้ดูแลระบบ
+                '🔔 แจ้งเตือน: มีการลงทะเบียนผู้พิมพ์ใหม่',
+                f'มีผู้พิมพ์ใหม่ลงทะเบียนด้วยอีเมล: {publisher_email} กรุณาตรวจสอบและอนุมัติบัญชี',
+                'BookHub <bookhub.noreply@gmail.com>',
+                ['bookhub.noreply@gmail.com'],
                 fail_silently=False,
+                html_message=html_message
             )
         except Exception as e:
             raise serializers.ValidationError(f"Failed to send admin notification: {str(e)}")
