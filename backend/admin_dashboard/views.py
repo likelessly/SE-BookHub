@@ -122,7 +122,7 @@ def reject_publisher(request, user_id):
             <p style="color: #333; font-size: 16px; margin-bottom: 15px;">สวัสดีคุณ {username},</p>
             <p style="color: #666; font-size: 16px; line-height: 1.6;">
                 ขออภัย การลงทะเบียนผู้พิมพ์ของคุณไม่ผ่านการพิจารณา 
-                หากคุณมีข้อสงสัยเพิ่มเติม สามารถติดต่อเราได้ที่อีเมล support@bookhub.com
+                หากคุณมีข้อสงสัยเพิ่มเติม สามารถติดต่อเราได้ที่อีเมล bookhub.noreply@gmail.com
             </p>
         </div>
 
