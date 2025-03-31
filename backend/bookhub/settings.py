@@ -77,6 +77,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
 ]
 
+# Frontend URL Configuration
+FRONTEND_URL = 'http://localhost:5173'  # Update this in production
+
 CORS_ORIGIN_ALLOW_ALL = True  # หรือจะระบุ URL ที่อนุญาตให้เชื่อมต่อจาก React โดยเฉพาะ
 # ตั้งค่า Email (สำหรับ demo ส่งไปที่ console)
 # ตั้งค่า Email Backend (ใช้ SMTP)

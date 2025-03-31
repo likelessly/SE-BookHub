@@ -1,21 +1,27 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from .serializers import (
     LoginSerializer,
     SignupReaderSerializer,
     ReaderVerificationSerializer,
     SignupPublisherSerializer,
+    ForgotPasswordSerializer,
+    ResetPasswordSerializer,
 )
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-from .models import Profile  # ✅ Import Profile
+from .models import Profile, PasswordReset  # ✅ Import Profile and PasswordReset
 from .serializers import serializers
 from google.oauth2 import id_token
 from google.auth.transport import requests
 import os
 from django.core.mail import send_mail
 import random
+from django.conf import settings
+from django.template.loader import render_to_string
 
 class LoginView(APIView):
     def post(self, request):
@@ -143,3 +149,101 @@ class GoogleLoginView(APIView):
             return Response({'detail': f'Invalid token: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'detail': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ForgotPasswordView(APIView):
+    def post(self, request):
+        serializer = ForgotPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            user = User.objects.get(email=email)
+            
+            # Create password reset token
+            reset_token = PasswordReset.objects.create(user=user)
+            
+            # Create reset link
+            reset_url = f"{settings.FRONTEND_URL}/reset-password/{reset_token.token}"
+            
+            # Send email
+            subject = 'Reset Your BookHub Password'
+            message = f'''
+            Hello {user.username},
+
+            Click the link below to reset your password:
+            {reset_url}
+
+            This link will expire in 24 hours.
+
+            If you didn't request this, please ignore this email.
+
+            Best regards,
+            BookHub Team
+            '''
+            
+            send_mail(
+                subject,
+                message,
+                'bookhub.noreply@gmail.com',
+                [email],
+                fail_silently=False,
+            )
+            
+            return Response({"message": "Password reset link sent to your email."})
+        return Response(serializer.errors, status=400)
+
+class ResetPasswordView(APIView):
+    def post(self, request, token):
+        try:
+            reset_token = PasswordReset.objects.get(
+                token=token,
+                is_used=False
+            )
+            
+            if not reset_token.is_valid():
+                return Response(
+                    {"error": "Password reset link has expired."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Validate passwords
+            new_password = request.data.get('new_password')
+            confirm_password = request.data.get('confirm_password')
+
+            if not new_password or not confirm_password:
+                return Response(
+                    {"error": "Both password fields are required."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if new_password != confirm_password:
+                return Response(
+                    {"error": "Passwords do not match."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            try:
+                # Validate password strength
+                validate_password(new_password, reset_token.user)
+            except ValidationError as e:
+                return Response(
+                    {"error": list(e.messages)}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Update password
+            user = reset_token.user
+            user.set_password(new_password)
+            user.save()
+
+            # Mark token as used
+            reset_token.is_used = True
+            reset_token.save()
+
+            return Response({
+                "message": "Password has been reset successfully."
+            })
+
+        except PasswordReset.DoesNotExist:
+            return Response(
+                {"error": "Invalid or expired password reset link."}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )

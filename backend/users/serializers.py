@@ -161,3 +161,23 @@ class SignupPublisherSerializer(serializers.Serializer):
             )
         except Exception as e:
             raise serializers.ValidationError(f"Failed to send admin notification: {str(e)}")
+
+class ForgotPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        try:
+            User.objects.get(email=value)
+            return value
+        except User.DoesNotExist:
+            raise serializers.ValidationError("No user found with this email address.")
+
+class ResetPasswordSerializer(serializers.Serializer):
+    token = serializers.UUIDField()
+    new_password = serializers.CharField(min_length=8, write_only=True)
+    confirm_password = serializers.CharField(min_length=8, write_only=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords don't match.")
+        return data
