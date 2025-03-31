@@ -28,12 +28,16 @@ def admin_dashboard(request):
     all_books = Book.objects.all()
     pending_publishers = User.objects.filter(profile__user_type='publisher', is_active=False)
     all_tags = Tag.objects.all().order_by('name')
-
+    publisher_count = User.objects.filter(
+        profile__user_type='publisher',
+        is_active=True  # Make sure to count only approved publishers
+    ).count()
     context = {
         'all_users': all_users,
         'all_books': all_books,
         'pending_publishers': pending_publishers,
         'all_tags': all_tags,
+        'publisher_count': publisher_count,
     }
 
     return render(request, 'admin_dashboard/dashboard.html', context)
