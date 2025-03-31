@@ -161,64 +161,71 @@ class ForgotPasswordView(APIView):
                 
                 # Create password reset token
                 reset_token = PasswordReset.objects.create(user=user)
-                
-                # Get frontend URL from settings
                 frontend_url = settings.FRONTEND_URL.rstrip('/')
                 reset_url = f"{frontend_url}/reset-password/{reset_token.token}"
                 
-                # Send email with HTML template
-                subject = 'รีเซ็ตรหัสผ่าน BookHub'
+                # Updated HTML email template
                 html_message = f"""
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="font-family: 'Prompt', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background-color: #ffffff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                     <div style="text-align: center; margin-bottom: 30px;">
-                        <h2 style="color: #ff6b00; margin-bottom: 10px;">BookHub - รีเซ็ตรหัสผ่าน</h2>
-                        <p style="color: #666;">ระบบได้รับคำขอรีเซ็ตรหัสผ่านของคุณ</p>
+                        <h1 style="color: #ff6b00; margin-bottom: 15px; font-size: 28px;">BookHub</h1>
+                        <div style="width: 50px; height: 3px; background-color: #ff6b00; margin: 0 auto 20px;"></div>
+                        <h2 style="color: #333; font-size: 24px; margin-bottom: 10px;">รีเซ็ตรหัสผ่าน</h2>
                     </div>
                     
-                    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-                        <p>สวัสดี {user.username},</p>
-                        <p>เราได้รับคำขอรีเซ็ตรหัสผ่านของคุณ คลิกที่ปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่:</p>
+                    <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px;">
+                        <p style="color: #333; font-size: 16px; margin-bottom: 15px;">สวัสดีคุณ {user.username},</p>
+                        <p style="color: #666; font-size: 16px; line-height: 1.6;">
+                            เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชี BookHub ของคุณ 
+                            หากคุณเป็นผู้ขอรีเซ็ตรหัสผ่าน กรุณาคลิกที่ปุ่มด้านล่างเพื่อดำเนินการต่อ
+                        </p>
                     </div>
 
-                    <div style="text-align: center; margin: 30px 0;">
+                    <div style="text-align: center; margin: 35px 0;">
                         <a href="{reset_url}" 
                            style="background-color: #ff6b00; 
                                   color: white; 
-                                  padding: 12px 24px; 
+                                  padding: 15px 30px; 
                                   text-decoration: none; 
-                                  border-radius: 4px;
+                                  border-radius: 5px;
                                   display: inline-block;
-                                  font-weight: bold;">
+                                  font-weight: bold;
+                                  font-size: 16px;
+                                  transition: background-color 0.3s ease;">
                             ตั้งรหัสผ่านใหม่
                         </a>
                     </div>
 
-                    <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                        <p style="color: #e65100; margin: 0;">
-                            ⚠️ ลิงก์นี้จะหมดอายุภายใน 24 ชั่วโมง
+                    <div style="background-color: #fff3e0; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #ff9800;">
+                        <p style="color: #e65100; margin: 0; font-size: 14px;">
+                            <strong>⚠️ โปรดทราบ:</strong><br>
+                            • ลิงก์นี้จะหมดอายุภายใน 24 ชั่วโมง<br>
+                            • หากคุณไม่ได้เป็นผู้ขอรีเซ็ตรหัสผ่าน กรุณาละเว้นอีเมลนี้<br>
+                            • เพื่อความปลอดภัย โปรดอย่าแชร์ลิงก์นี้กับผู้อื่น
                         </p>
                     </div>
 
-                    <p style="color: #666;">
-                        หากคุณไม่ได้เป็นผู้ขอรีเซ็ตรหัสผ่าน กรุณาละเว้นอีเมลนี้
-                    </p>
-
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
 
                     <div style="text-align: center;">
-                        <p style="color: #666; font-size: 12px; margin: 5px 0;">
+                        <p style="color: #666; font-size: 14px; margin: 5px 0; line-height: 1.5;">
                             ขอแสดงความนับถือ<br>
-                            ทีมงาน BookHub
+                            <strong style="color: #ff6b00;">ทีมงาน BookHub</strong>
+                        </p>
+                        <p style="color: #999; font-size: 12px; margin-top: 20px;">
+                            หากคุณต้องการความช่วยเหลือ กรุณาติดต่อ support@bookhub.com
                         </p>
                     </div>
                 </div>
                 """
                 
+                # Send email
+                subject = '🔐 รีเซ็ตรหัสผ่าน BookHub'
                 try:
                     send_mail(
                         subject,
-                        "กรุณาใช้อีเมลไคลเอนต์ที่รองรับ HTML เพื่อดูข้อความนี้",
-                        'bookhub.noreply@gmail.com',
+                        "กรุณาเปิดอีเมลนี้ด้วยโปรแกรมที่รองรับ HTML",
+                        'BookHub <bookhub.noreply@gmail.com>',
                         [email],
                         fail_silently=False,
                         html_message=html_message
