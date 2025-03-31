@@ -36,5 +36,31 @@ export const useBookActions = (fetchAccountData, showNotification) => {
     }
   }, [fetchAccountData, showNotification, token, returnLoading]);
 
-  return { handleReturn, returnLoading, returningBookId };
+  const handleBorrow = useCallback(async (bookId, bookTitle) => {
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/books/borrow/`,
+        { book_id: bookId },
+        { headers: { Authorization: `Token ${token}` } }
+      );
+
+      showNotification('success', `You have successfully borrowed "${bookTitle}"`);
+      return true;
+    } catch (error) {
+      if (error.response?.data?.status === 'ALREADY_BORROWED') {
+        showNotification('error', 'You have already borrowed this book and haven\'t returned it yet.');
+      } else {
+        showNotification('error', error.response?.data?.error || 'Unable to borrow the book. Please try again later.');
+      }
+      return false;
+    }
+  }, [token, showNotification]);
+
+  return {
+    handleBorrow,
+    handleReturn,
+    returnLoading,
+    returningBookId
+  };
 };
