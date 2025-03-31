@@ -9,7 +9,7 @@ const AccountStats = ({ user }) => {
       <div className="stats-grid">
         <div className="stat-item">
           <span className="stat-label">Name:</span>
-          <span className="stat-value">{user?.first_name || user?.username || 'N/A'}</span>
+          <span className="stat-value">{user?.name || 'N/A'}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">Email:</span>
