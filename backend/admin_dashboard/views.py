@@ -9,8 +9,11 @@ from books.models import Book, Tag
 from django.urls import reverse
 from django.contrib.auth import logout as auth_logout
 from django.views.decorators.http import require_POST
-
+from supabase import create_client, Client
+from urllib.parse import urlparse
+from django.conf import settings
 # ฟังก์ชันตรวจสอบว่า user เป็น admin (superuser)
+supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_KEY)
 def is_admin(user):
     return user.is_superuser
 
@@ -172,7 +175,32 @@ def delete_user(request, user_id):
 def delete_book(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     book_title = book.title
-    book.delete()
+    if book.cover_image:
+        # แปลง URL เป็น path สำหรับ Supabase
+        parsed_url = urlparse(book.cover_image)
+        file_path = parsed_url.path.replace("storage/v1/object/public/Bookhub_media/", "")  # ลบส่วนเกินออก
+        bucket_name = "Bookhub_media"  # Bucket สำหรับ cover_image
+
+                # ตรวจสอบว่า path ไม่มีส่วนที่ซ้ำซ้อนและไม่มี '/' เกินมา
+        if not file_path.startswith("covers/"):
+            file_path = f"{file_path.lstrip('/')}"
+
+                
+
+        response = supabase.storage.from_(bucket_name).remove([file_path])
+                
+
+        # ลบไฟล์ pdf_file ถ้ามี
+        if book.pdf_file.name:
+                file_path = book.pdf_file.name  # ใช้ชื่อไฟล์ตรงๆ
+                bucket_name = "Bookhub_pdf"  # Bucket สำหรับ pdf_file
+
+                
+
+                response = supabase.storage.from_(bucket_name).remove([f"pdfs/{file_path}"])
+
+        # ลบหนังสือ
+        book.delete()
     messages.success(request, f"Book {book_title} deleted.")
     return redirect('admin_dashboard')
 
