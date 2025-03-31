@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
-import './auth.css';
+import './Auth.css';
 import SignupModal from "../components/account/SignupModal";
 import { FaUser, FaLock, FaBook, FaGoogle } from 'react-icons/fa';
 
