@@ -173,6 +173,10 @@ ul {
   background-color: rgba(255, 255, 255, 0.05);
 }
 
+.nav-links li:last-child {
+  margin-bottom: 1rem;
+}
+
 .sidebar-footer {
   position: absolute;
   bottom: 0;
@@ -559,8 +563,23 @@ header {
 }
 
 .btn-danger {
-  background-color: var(--danger-color);
+  background-color: #dc3545;
   color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-danger.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .btn-action {
@@ -571,6 +590,11 @@ header {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn:hover {
@@ -787,3 +811,32 @@ header {
     width: 100%;
   }
 }
+
+/* Add these styles at the end of the file */
+.tag-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-name i {
+  color: #ff6b00;
+}
+
+.books-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.books-count i {
+  color: var(--primary-color);
+}
+
+.count-label {
+  color: #888;
+  font-size: 0.9em;
+}
+
+/* Add this to the existing script section */
+setupSearch('tagSearch', 'tagsTable');

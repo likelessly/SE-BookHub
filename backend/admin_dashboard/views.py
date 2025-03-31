@@ -5,9 +5,10 @@ from django.contrib.auth.views import LoginView
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
-from books.models import Book
+from books.models import Book, Tag
 from django.urls import reverse
 from django.contrib.auth import logout as auth_logout
+from django.views.decorators.http import require_POST
 
 # ฟังก์ชันตรวจสอบว่า user เป็น admin (superuser)
 def is_admin(user):
@@ -26,11 +27,13 @@ def admin_dashboard(request):
     all_users = User.objects.all()
     all_books = Book.objects.all()
     pending_publishers = User.objects.filter(profile__user_type='publisher', is_active=False)
+    all_tags = Tag.objects.all().order_by('name')
 
     context = {
         'all_users': all_users,
         'all_books': all_books,
         'pending_publishers': pending_publishers,
+        'all_tags': all_tags,
     }
 
     return render(request, 'admin_dashboard/dashboard.html', context)
@@ -87,6 +90,27 @@ def delete_book(request, book_id):
     book_title = book.title
     book.delete()
     messages.success(request, f"Book {book_title} deleted.")
+    return redirect('admin_dashboard')
+
+# View สำหรับลบแท็ก
+@login_required
+@user_passes_test(is_admin)
+@require_POST
+def delete_tag(request, tag_id):
+    try:
+        tag = get_object_or_404(Tag, id=tag_id)
+        
+        if tag.book_set.count() > 0:
+            messages.error(request, f'Cannot delete tag "{tag.name}" because it is being used by {tag.book_set.count()} books.')
+            return redirect('admin_dashboard')
+        
+        tag_name = tag.name
+        tag.delete()
+        messages.success(request, f'Tag "{tag_name}" has been deleted successfully.')
+        
+    except Exception as e:
+        messages.error(request, f'Error deleting tag: {str(e)}')
+    
     return redirect('admin_dashboard')
 
 # Custom logout view

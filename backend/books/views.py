@@ -354,3 +354,26 @@ class AccountReaderView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+class DeleteTagView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, tag_id):
+        try:
+            tag = get_object_or_404(Tag, id=tag_id)
+            
+            # Check if tag is being used
+            if tag.book_set.count() > 0:
+                return Response({
+                    "error": "Cannot delete tag that is being used by books"
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+            tag.delete()
+            return Response({
+                "message": f"Tag '{tag.name}' deleted successfully"
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                "error": str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+
