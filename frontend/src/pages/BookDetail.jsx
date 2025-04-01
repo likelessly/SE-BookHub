@@ -250,7 +250,7 @@ const BookDetail = () => {
             </div>
           )}
           
-          {role === 'publisher' && (
+          {role === 'publisher' && Number(localStorage.getItem('userId'))=== book.publisher_id && (
             <div className="publisher-actions-main">
               <button className="edit-button" onClick={handleEditBook}>
                 <FaEdit /> Edit Book
