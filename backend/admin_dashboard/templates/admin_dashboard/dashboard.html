@@ -13,7 +13,8 @@
 
 <body>
   <!-- Sidebar Navigation -->
-  <div class="sidebar">
+  <div class="sidebar-overlay"></div>
+  <nav class="sidebar">
     <div class="sidebar-header">
       <div class="logo">
         <img src="{% static 'Bookhub.png' %}" alt="BookHub Logo">
@@ -54,15 +55,17 @@
         <span>Logout</span>
       </a>
     </div>
-  </div>
+  </nav>
 
-  <!-- Main Content -->
-  <div class="main-content">
-    <header>
-      <div class="header-content">
-        <div class="menu-toggle">
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <button class="menu-toggle">
           <i class="fas fa-bars"></i>
-        </div>
+        </button>
+      </div>
+      <div class="header-right">
         <div class="user-info">
           <span>Welcome, {{ request.user.username }}</span>
           <div class="user-avatar">
@@ -70,8 +73,11 @@
           </div>
         </div>
       </div>
-    </header>
+    </div>
+  </header>
 
+  <!-- Main Content -->
+  <div class="main-content">
     <!-- Dashboard Stats -->
     <div class="dashboard-stats">
       <div class="stat-card">
