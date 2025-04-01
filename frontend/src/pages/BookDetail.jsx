@@ -135,6 +135,9 @@ const BookDetail = () => {
     }
   };
 
+  const isPublisher = role === 'publisher';
+  const isOwner = book?.publisher_id && userId && book.publisher_id === userId;
+
   if (loading) return (
     <div className="book-detail-page">
       <div className="loading-container">
@@ -243,7 +246,7 @@ const BookDetail = () => {
               </div>
             )}
             
-            {role === 'publisher' && Number(userId) === book.publisher_id && (
+            {isPublisher && isOwner && (
               <div className="publisher-actions-main">
                 <button className="edit-button" onClick={handleEditBook}>
                   <FaEdit /> Edit Book

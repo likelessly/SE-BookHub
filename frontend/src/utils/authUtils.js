@@ -13,10 +13,16 @@ export const saveAuthData = (data, rememberMe = false) => {
 };
 
 export const getAuthData = () => {
+  // ตรวจสอบทั้ง localStorage และ sessionStorage
   const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   const role = localStorage.getItem('role') || sessionStorage.getItem('role');
   const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-  return { token, role, userId };
+
+  return {
+    token,
+    role,
+    userId: userId ? parseInt(userId) : null  // แปลง userId เป็น number
+  };
 };
 
 export const clearAuthData = () => {
