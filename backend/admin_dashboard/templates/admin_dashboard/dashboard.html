@@ -12,14 +12,24 @@
 </head>
 
 <body>
-  <!-- Sidebar Navigation -->
+  <!-- Mobile Nav Toggle Button (outside sidebar) -->
+  <button class="mobile-nav-toggle d-md-none">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- Sidebar Overlay -->
   <div class="sidebar-overlay"></div>
+  
+  <!-- Updated Sidebar Navigation -->
   <nav class="sidebar">
     <div class="sidebar-header">
       <div class="logo">
         <img src="{% static 'Bookhub.png' %}" alt="BookHub Logo">
       </div>
       <h3>BookHub</h3>
+      <button class="close-sidebar d-md-none">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
 
     <ul class="nav-links">
@@ -434,10 +444,72 @@
 
   <!-- Custom JS -->
   <script>
-    // Toggle sidebar
-    document.querySelector('.menu-toggle').addEventListener('click', function () {
-      document.querySelector('.sidebar').classList.toggle('collapsed');
-      document.querySelector('.main-content').classList.toggle('expanded');
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebar = document.querySelector('.sidebar');
+      const sidebarOverlay = document.querySelector('.sidebar-overlay');
+      const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
+      const closeSidebarBtn = document.querySelector('.close-sidebar');
+      const menuToggle = document.querySelector('.menu-toggle');
+      
+      // Desktop sidebar toggle
+      if (menuToggle) {
+        menuToggle.addEventListener('click', function () {
+          sidebar.classList.toggle('collapsed');
+          document.querySelector('.main-content').classList.toggle('expanded');
+        });
+      }
+      
+      // Mobile sidebar toggle
+      if (mobileNavToggle) {
+        mobileNavToggle.addEventListener('click', function() {
+          sidebar.classList.add('active');
+          sidebarOverlay.classList.add('active');
+          document.body.style.overflow = 'hidden'; // Prevent scrolling
+        });
+      }
+      
+      // Close sidebar
+      function closeSidebar() {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // Re-enable scrolling
+      }
+      
+      // Close sidebar when clicking close button
+      if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+      }
+      
+      // Close sidebar when clicking overlay
+      if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+      }
+      
+      // Close sidebar when clicking a nav link (on mobile)
+      const navLinks = document.querySelectorAll('.nav-links a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          if (window.innerWidth < 769) {
+            closeSidebar();
+          }
+        });
+      });
+
+      // Table search functionality
+      setupSearch('userSearch', 'usersTable');
+      setupSearch('bookSearch', 'booksTable');
+      setupSearch('tagSearch', 'tagsTable');
+
+      // Highlight active nav link based on scroll position
+      highlightActiveSection();
+      window.addEventListener('scroll', highlightActiveSection);
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (window.innerWidth >= 769) {
+          closeSidebar();
+        }
+      });
     });
 
     // Table search functionality
@@ -477,8 +549,30 @@
       }
     }
 
+    // Highlight active section in navigation
+    function highlightActiveSection() {
+      const sections = document.querySelectorAll('.section');
+      const navLinks = document.querySelectorAll('.nav-links li a');
+      let current = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+
+        if (pageYOffset >= (sectionTop - 200)) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.parentElement.classList.remove('active');
+        if (link.getAttribute('href').includes(current)) {
+          link.parentElement.classList.add('active');
+        }
+      });
+    }
+
     // Delete confirmation for all items
-    // Updated confirmDelete function to handle both direct URLs and form submissions
     function confirmDelete(target, itemName) {
       const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
       const confirmBtn = document.getElementById('confirmDeleteBtn');
@@ -521,37 +615,6 @@
       }
       return cookieValue;
     }
-
-    // Initialize all searches
-    document.addEventListener('DOMContentLoaded', function () {
-      setupSearch('userSearch', 'usersTable');
-      setupSearch('bookSearch', 'booksTable');
-      setupSearch('tagSearch', 'tagsTable');  // Add this line
-
-      // Highlight active nav link based on scroll position
-      const sections = document.querySelectorAll('.section');
-      const navLinks = document.querySelectorAll('.nav-links li a');
-
-      window.addEventListener('scroll', function () {
-        let current = '';
-
-        sections.forEach(section => {
-          const sectionTop = section.offsetTop;
-          const sectionHeight = section.clientHeight;
-
-          if (pageYOffset >= (sectionTop - 200)) {
-            current = section.getAttribute('id');
-          }
-        });
-
-        navLinks.forEach(link => {
-          link.parentElement.classList.remove('active');
-          if (link.getAttribute('href').includes(current)) {
-            link.parentElement.classList.add('active');
-          }
-        });
-      });
-    });
   </script>
 </body>
 
