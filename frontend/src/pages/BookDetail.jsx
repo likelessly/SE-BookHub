@@ -162,163 +162,151 @@ const BookDetail = () => {
         </div>
       )}
       
-      <div className="book-detail-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          <FaArrowLeft /> Back to Browse
-        </button>
-        
-        {/* <div className="book-actions-top">
-          <button className="action-button share-button" onClick={handleShare}>
-            <FaShare /> Share
-          </button>
-        </div> */}
-      </div>
-      
       <div className="book-detail-container">
-        {/* Left Column - Book Cover & Stats */}
-        <div className="book-detail-left">
-          <div className="book-image-container">
-            <div className="book-image">
-              <img
-                src={book.cover_image || '/cover_default.jpg'}
-                alt={book.title}
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/cover_default.jpg";
-                }}
-              />
-            </div>
-            
-            <div className="availability-indicator">
-              <span className={book.remaining_borrows > 0 ? 'available' : 'unavailable'}>
-                {book.remaining_borrows > 0 ? 'Available Now' : 'Currently Unavailable'}
-              </span>
-            </div>
-          </div>
-          
-          <div className="book-stats">
-            <div className="stat-item">
-              <div className="stat-icon">
-                <FaBookOpen />
-              </div>
-              <div className="stat-info">
-                <div className="stat-value">{book.max_borrowers}</div>
-                <div className="stat-label">Total Copies</div>
-              </div>
-            </div>
-            
-            <div className="stat-item">
-              <div className="stat-icon">
-                <FaUsers />
-              </div>
-              <div className="stat-info">
-                <div className="stat-value">{book.remaining_borrows}</div>
-                <div className="stat-label">Available</div>
-              </div>
-            </div>
-            
-            <div className="stat-item">
-              <div className="stat-icon">
-                <FaCalendarAlt />
-              </div>
-              <div className="stat-info">
-                <div className="stat-value">{book.lending_period}</div>
-                <div className="stat-label">Days</div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Action Buttons */}
-          {role === 'reader' && (
-            <div className="book-actions-main">
-              <button 
-                className={`borrow-button ${book.remaining_borrows <= 0 ? 'disabled' : ''}`}
-                onClick={handleBorrowBook}
-                disabled={borrowing || book.remaining_borrows <= 0}
-              >
-                {borrowing ? (
-                  <>
-                    <div className="button-loader"></div>
-                    <span>Processing...</span>
-                  </>
-                ) : book.remaining_borrows <= 0 ? 'Currently Unavailable' : 'Borrow This Book'}
-              </button>
-              
-              {/* <button className="favorite-button">
-                Add to Favorites
-              </button> */}
-            </div>
-          )}
-          
-          {role === 'publisher' && Number(localStorage.getItem('userId'))=== book.publisher_id && (
-            <div className="publisher-actions-main">
-              <button className="edit-button" onClick={handleEditBook}>
-                <FaEdit /> Edit Book
-              </button>
-              
-              <button className="remove-button" onClick={handleRemoveBook}>
-                <FaTrash /> Remove Book
-              </button>
-            </div>
-          )}
+        {/* Add Back Button inside container */}
+        <div className="page-navigation">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            <FaArrowLeft /> Back to Browse
+          </button>
         </div>
-        
-        {/* Right Column - Book Details */}
-        <div className="book-detail-right">
-          <div className="book-header">
-            <h1 className="book-title">{book.title}</h1>
-            
-            <div className="book-tags">
-              {book.tags && book.tags.length > 0 ? book.tags.map((tag, index) => (
-                <span key={index} className="tag-pill">{tag}</span>
-              )) : <span className="no-tags">No Tags</span>}
+
+        <div className="book-content">
+          {/* Left Column - Book Cover & Stats */}
+          <div className="book-detail-left">
+            <div className="book-image-container">
+              <div className="book-image">
+                <img
+                  src={book.cover_image || '/cover_default.jpg'}
+                  alt={book.title}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/cover_default.jpg";
+                  }}
+                />
+              </div>
+              
+              <div className="availability-indicator">
+                <span className={book.remaining_borrows > 0 ? 'available' : 'unavailable'}>
+                  {book.remaining_borrows > 0 ? 'Available Now' : 'Currently Unavailable'}
+                </span>
+              </div>
             </div>
             
-            <div className="publisher-info">
-              <FaUserTie className="publisher-icon" />
-              <span>Published by {book.publisher_name}</span>
-            </div>
-          </div>
-          
-          <div className="book-description">
-            <h3>About this book</h3>
-            <p>{book.description || "No description available."}</p>
-          </div>
-          
-          <div className="book-details-card">
-            <h3>Book Details</h3>
-            <div className="details-grid">
-              <div className="detail-item">
-                <div className="detail-label">Publisher</div>
-                <div className="detail-value">{book.publisher_name}</div>
-              </div>
-              
-              {/* <div className="detail-item">
-                <div className="detail-label">Publication Date</div>
-                <div className="detail-value">{new Date(book.created_at).toLocaleDateString()}</div>
-              </div> */}
-              
-              <div className="detail-item">
-                <div className="detail-label">Maximum Borrowers</div>
-                <div className="detail-value">{book.max_borrowers}</div>
-              </div>
-              
-              <div className="detail-item">
-                <div className="detail-label">Lending Period</div>
-                <div className="detail-value">{book.lending_period} days</div>
-              </div>
-              
-              <div className="detail-item">
-                <div className="detail-label">Available Copies</div>
-                <div className={`detail-value ${book.remaining_borrows > 0 ? 'available' : 'unavailable'}`}>
-                  {book.remaining_borrows} of {book.max_borrowers}
+            <div className="book-stats">
+              <div className="stat-item">
+                <div className="stat-icon">
+                  <FaBookOpen />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-value">{book.max_borrowers}</div>
+                  <div className="stat-label">Total Copies</div>
                 </div>
               </div>
               
-              <div className="detail-item">
-                <div className="detail-label">Tags</div>
-                <div className="detail-value">
-                  {book.tags && book.tags.length > 0 ? book.tags.join(', ') : 'None'}
+              <div className="stat-item">
+                <div className="stat-icon">
+                  <FaUsers />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-value">{book.remaining_borrows}</div>
+                  <div className="stat-label">Available</div>
+                </div>
+              </div>
+              
+              <div className="stat-item">
+                <div className="stat-icon">
+                  <FaCalendarAlt />
+                </div>
+                <div className="stat-info">
+                  <div className="stat-value">{book.lending_period}</div>
+                  <div className="stat-label">Days</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Action Buttons */}
+            {role === 'reader' && (
+              <div className="book-actions-main">
+                <button 
+                  className={`borrow-button ${book.remaining_borrows <= 0 ? 'disabled' : ''}`}
+                  onClick={handleBorrowBook}
+                  disabled={borrowing || book.remaining_borrows <= 0}
+                >
+                  {borrowing ? (
+                    <>
+                      <div className="button-loader"></div>
+                      <span>Processing...</span>
+                    </>
+                  ) : book.remaining_borrows <= 0 ? 'Currently Unavailable' : 'Borrow This Book'}
+                </button>
+              </div>
+            )}
+            
+            {role === 'publisher' && (
+              <div className="publisher-actions-main">
+                <button className="edit-button" onClick={handleEditBook}>
+                  <FaEdit /> Edit Book
+                </button>
+                
+                <button className="remove-button" onClick={handleRemoveBook}>
+                  <FaTrash /> Remove Book
+                </button>
+              </div>
+            )}
+          </div>
+          
+          {/* Right Column - Book Details */}
+          <div className="book-detail-right">
+            <div className="book-header">
+              <h1 className="book-title">{book.title}</h1>
+              
+              <div className="book-tags">
+                {book.tags && book.tags.length > 0 ? book.tags.map((tag, index) => (
+                  <span key={index} className="tag-pill">{tag}</span>
+                )) : <span className="no-tags">No Tags</span>}
+              </div>
+              
+              <div className="publisher-info">
+                <FaUserTie className="publisher-icon" />
+                <span>Published by {book.publisher_name}</span>
+              </div>
+            </div>
+            
+            <div className="book-description">
+              <h3>About this book</h3>
+              <p>{book.description || "No description available."}</p>
+            </div>
+            
+            <div className="book-details-card">
+              <h3>Book Details</h3>
+              <div className="details-grid">
+                <div className="detail-item">
+                  <div className="detail-label">Publisher</div>
+                  <div className="detail-value">{book.publisher_name}</div>
+                </div>
+                
+                <div className="detail-item">
+                  <div className="detail-label">Maximum Borrowers</div>
+                  <div className="detail-value">{book.max_borrowers}</div>
+                </div>
+                
+                <div className="detail-item">
+                  <div className="detail-label">Lending Period</div>
+                  <div className="detail-value">{book.lending_period} days</div>
+                </div>
+                
+                <div className="detail-item">
+                  <div className="detail-label">Available Copies</div>
+                  <div className={`detail-value ${book.remaining_borrows > 0 ? 'available' : 'unavailable'}`}>
+                    {book.remaining_borrows} of {book.max_borrowers}
+                  </div>
+                </div>
+                
+                <div className="detail-item">
+                  <div className="detail-label">Tags</div>
+                  <div className="detail-value">
+                    {book.tags && book.tags.length > 0 ? book.tags.join(', ') : 'None'}
+                  </div>
                 </div>
               </div>
             </div>

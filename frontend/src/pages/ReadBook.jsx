@@ -6,6 +6,7 @@ import axios from 'axios';
 import { getAuthData } from '../utils/authUtils';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import './ReadBook.css';
+import { FaArrowLeft } from 'react-icons/fa';
 
 // Set worker source using the same version as pdfjs-dist
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
@@ -133,6 +134,13 @@ const ReadBook = () => {
       onContextMenu={preventContextMenu}
       onDragStart={preventDragStart}
     >
+      <div className="pdf-header">
+        <button className="back-button" onClick={() => navigate(-1)}>
+          <FaArrowLeft />
+          <span>Back to Account</span>
+        </button>
+      </div>
+
       <div className="pdf-controls">
         <div className="navigation-controls">
           <button onClick={goToPreviousPage} disabled={currentPage <= 1}>
