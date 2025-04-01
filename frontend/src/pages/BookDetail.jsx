@@ -148,7 +148,7 @@ const BookDetail = () => {
     <div className="book-detail-page">
       <div className="error-container">
         <p>{error}</p>
-        <button className="back-button" onClick={() => navigate(-1)}>
+        <button className="back-button" onClick={() => navigate('/main')}>
           <FaArrowLeft /> Go Back
         </button>
       </div>
@@ -166,7 +166,7 @@ const BookDetail = () => {
       <div className="book-detail-container">
         {/* Add Back Button inside container */}
         <div className="page-navigation">
-          <button className="back-button" onClick={() => navigate(-1)}>
+          <button className="back-button" onClick={() => navigate('/main')}>
             <FaArrowLeft /> Back to Browse
           </button>
         </div>
