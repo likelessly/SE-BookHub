@@ -97,7 +97,7 @@ const BookDetail = () => {
         })
         .then(() => {
           showNotification('success', 'Book removed successfully!');
-          setTimeout(() => navigate('/account/publisher'), 1500);
+          setTimeout(() => navigate('/main'), 1500);
         })
         .catch((err) => {
           console.error('Error removing book:', err.response?.data);
