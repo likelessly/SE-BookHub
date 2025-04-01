@@ -118,25 +118,7 @@ const BookDetail = () => {
   };
   
   // eslint-disable-next-line no-unused-vars
-  const handleShare = () => {
-    const url = window.location.href;
-    
-    if (navigator.share) {
-      navigator.share({
-        title: book.title,
-        text: `Check out this book: ${book.title}`,
-        url: url
-      })
-      .catch(err => console.error('Error sharing:', err));
-    } else {
-      navigator.clipboard.writeText(url)
-        .then(() => showNotification('success', 'Link copied to clipboard'))
-        .catch(err => console.error('Could not copy text: ', err));
-    }
-  };
 
-  const isPublisher = role === 'publisher';
-  const isOwner = book?.publisher_id && userId && book.publisher_id === userId;
 
   if (loading) return (
     <div className="book-detail-page">
@@ -246,7 +228,7 @@ const BookDetail = () => {
               </div>
             )}
             
-            {isPublisher && isOwner && (
+            {role === 'publisher' && Number(userId) === book.publisher_id && (
               <div className="publisher-actions-main">
                 <button className="edit-button" onClick={handleEditBook}>
                   <FaEdit /> Edit Book
