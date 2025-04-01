@@ -4,7 +4,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import './Auth.css';
 import SignupModal from "../components/account/SignupModal";
-import { FaUser, FaLock, FaBook, FaGoogle } from 'react-icons/fa';
+import { FaUser, FaLock, FaBook, FaGoogle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { saveAuthData, clearAuthData } from '../utils/authUtils';
 
 const Login = () => {
@@ -13,8 +13,14 @@ const Login = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
   const navigate = useNavigate();
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -148,18 +154,26 @@ const Login = () => {
               />
             </div>
 
-            <div className="form-group">
+            <div className="form-group password-group">
               <div className="input-icon">
                 <FaLock />
               </div>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={loading}
               />
+              <button 
+                type="button" 
+                className="password-toggle" 
+                onClick={togglePasswordVisibility}
+                tabIndex="-1"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
             </div>
 
             <div className="form-options">

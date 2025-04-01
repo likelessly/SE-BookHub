@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
-import { FaUser, FaEnvelope, FaLock, FaArrowLeft, FaBook, FaCheck, FaSpinner } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaArrowLeft, FaBook, FaCheck, FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const SignupReader = () => {
   const [step, setStep] = useState(1); // 1: Form entry, 2: Verification code
@@ -15,25 +15,27 @@ const SignupReader = () => {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
   const navigate = useNavigate();
-
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       setLoading(false);
       return;
     }
-    
+
     try {
-      await axios.post('http://127.0.0.1:8000/api/signup/reader/', { 
+      await axios.post('http://127.0.0.1:8000/api/signup/reader/', {
         username: name,
-        email, 
-        password 
+        email,
+        password
       });
       setStep(2);
       setMessage('Verification code sent to your email. Please check your inbox.');
@@ -49,14 +51,14 @@ const SignupReader = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     try {
-      await axios.post('http://127.0.0.1:8000/api/signup/reader/verify/', { 
-        email, 
-        verification_code: verificationCode 
+      await axios.post('http://127.0.0.1:8000/api/signup/reader/verify/', {
+        email,
+        verification_code: verificationCode
       });
       setMessage('Your account has been verified successfully!');
-      
+
       // Redirect to login page after 3 seconds
       setTimeout(() => {
         navigate('/login');
@@ -72,7 +74,7 @@ const SignupReader = () => {
   const resendVerificationCode = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       await axios.post('http://127.0.0.1:8000/api/signup/reader/resend-code/', { email });
       setMessage('A new verification code has been sent to your email.');
@@ -94,7 +96,7 @@ const SignupReader = () => {
             </div>
             <p className="slogan">Access thousands of books at your fingertips.</p>
           </div>
-          
+
           <div className="login-features">
             <div className="feature-item">
               <div className="feature-icon">📚</div>
@@ -103,7 +105,7 @@ const SignupReader = () => {
                 <p>Borrow from our vast collection of digital books</p>
               </div>
             </div>
-            
+
             <div className="feature-item">
               <div className="feature-icon">🔖</div>
               <div className="feature-text">
@@ -111,7 +113,7 @@ const SignupReader = () => {
                 <p>Save your progress and add notes while reading</p>
               </div>
             </div>
-            
+
             <div className="feature-item">
               <div className="feature-icon">📱</div>
               <div className="feature-text">
@@ -132,12 +134,12 @@ const SignupReader = () => {
               2
             </div>
           </div>
-          
+
           <div className="login-form-header">
             <h2>{step === 1 ? 'Create Reader Account' : 'Verify Your Email'}</h2>
             <p className="form-description">
-              {step === 1 
-                ? 'Sign up to access thousands of books and educational resources.' 
+              {step === 1
+                ? 'Sign up to access thousands of books and educational resources.'
                 : 'Enter the verification code sent to your email.'}
             </p>
           </div>
@@ -147,74 +149,82 @@ const SignupReader = () => {
               <p>{error}</p>
             </div>
           )}
-          
+
           {message && !error && (
             <div className="success-message">
               <p>{message}</p>
             </div>
           )}
-          
+
           {step === 1 ? (
             <form onSubmit={handleFormSubmit} className="login-form">
               <div className="form-group">
                 <div className="input-icon">
                   <FaUser />
                 </div>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Username"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  required 
+                  required
                   disabled={loading}
                 />
               </div>
-              
+
               <div className="form-group">
                 <div className="input-icon">
                   <FaEnvelope />
                 </div>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   placeholder="Email Address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required 
+                  required
                   disabled={loading}
                 />
               </div>
-              
-              <div className="form-group">
+
+              <div className="form-group password-group">
                 <div className="input-icon">
                   <FaLock />
                 </div>
-                <input 
-                  type="password" 
+                <input
+                  type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required 
+                  required
                   disabled={loading}
                 />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility}
+                  tabIndex="-1"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
               </div>
-              
+
               <div className="form-group">
                 <div className="input-icon">
                   <FaLock />
                 </div>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  required 
+                  required
                   disabled={loading}
                 />
               </div>
-              
-              <button 
-                type="submit" 
-                className="login-button" 
+
+              <button
+                type="submit"
+                className="login-button"
                 disabled={loading}
               >
                 {loading ? (
@@ -231,23 +241,23 @@ const SignupReader = () => {
                   <div className="input-icon">
                     <FaLock />
                   </div>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Enter verification code"
                     value={verificationCode}
                     onChange={(e) => setVerificationCode(e.target.value)}
-                    required 
+                    required
                     disabled={loading}
                     maxLength={6}
                     className="verification-input"
                   />
                 </div>
-                
+
                 <div className="verification-help">
                   <p>
                     Didn't receive the code?{' '}
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="resend-button"
                       onClick={resendVerificationCode}
                       disabled={loading}
@@ -257,10 +267,10 @@ const SignupReader = () => {
                   </p>
                 </div>
               </div>
-              
-              <button 
-                type="submit" 
-                className="login-button" 
+
+              <button
+                type="submit"
+                className="login-button"
                 disabled={loading}
               >
                 {loading ? (
@@ -271,7 +281,7 @@ const SignupReader = () => {
               </button>
             </form>
           )}
-          
+
           <Link to="/login" className="back-to-login">
             <FaArrowLeft /> Back to Login
           </Link>

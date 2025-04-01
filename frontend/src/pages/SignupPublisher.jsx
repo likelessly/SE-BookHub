@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import './Auth.css';
-import { FaUser, FaEnvelope, FaLock, FaIdCard, FaArrowLeft, FaBook } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaIdCard, FaArrowLeft, FaBook, FaEye, FaEyeSlash } from 'react-icons/fa';
 
 const SignupPublisher = () => {
   const [name, setName] = useState('');
@@ -14,21 +14,24 @@ const SignupPublisher = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   const navigate = useNavigate();
-
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
     // Validate passwords
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       setLoading(false);
       return;
     }
-    
+
     // Validate ID card
     if (idCard.length < 8) {
       setError('ID Card number must be at least 8 characters.');
@@ -43,25 +46,25 @@ const SignupPublisher = () => {
         password,
         id_card: idCard
       });
-      
+
       setSuccess(true);
-      
+
       // Clear form
       setName('');
       setEmail('');
       setPassword('');
       setConfirmPassword('');
       setIdCard('');
-      
+
       // Redirect after 3 seconds
       setTimeout(() => {
         navigate('/login');
       }, 3000);
-      
+
     } catch (err) {
       console.error(err);
       setError(
-        err.response?.data?.detail || 
+        err.response?.data?.detail ||
         'Registration failed. Please check your information and try again.'
       );
     } finally {
@@ -80,7 +83,7 @@ const SignupPublisher = () => {
             </div>
             <p className="slogan">Become a publisher and share your knowledge with the world.</p>
           </div>
-          
+
           <div className="publisher-benefits">
             <div className="feature-item">
               <div className="feature-icon">📚</div>
@@ -89,7 +92,7 @@ const SignupPublisher = () => {
                 <p>Share your knowledge and expertise with a global audience</p>
               </div>
             </div>
-            
+
             <div className="feature-item">
               <div className="feature-icon">📊</div>
               <div className="feature-text">
@@ -97,7 +100,7 @@ const SignupPublisher = () => {
                 <p>Monitor who is reading your publications</p>
               </div>
             </div>
-            
+
             <div className="feature-item">
               <div className="feature-icon">🔒</div>
               <div className="feature-text">
@@ -121,7 +124,7 @@ const SignupPublisher = () => {
               <p>{error}</p>
             </div>
           )}
-          
+
           {success ? (
             <div className="success-message">
               <p>Registration submitted successfully!</p>
@@ -138,82 +141,90 @@ const SignupPublisher = () => {
                 <div className="input-icon">
                   <FaUser />
                 </div>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Full Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  required 
+                  required
                   disabled={loading}
                 />
               </div>
-              
+
               <div className="form-group">
                 <div className="input-icon">
                   <FaEnvelope />
                 </div>
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   placeholder="Email Address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required 
+                  required
                   disabled={loading}
                 />
               </div>
-              
-              <div className="form-group">
+
+              <div className="form-group password-group">
                 <div className="input-icon">
                   <FaLock />
                 </div>
-                <input 
-                  type="password" 
+                <input
+                  type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required 
+                  required
                   disabled={loading}
                 />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility}
+                  tabIndex="-1"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
               </div>
-              
+
               <div className="form-group">
                 <div className="input-icon">
                   <FaLock />
                 </div>
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  required 
+                  required
                   disabled={loading}
                 />
               </div>
-              
+
               <div className="form-group">
                 <div className="input-icon">
                   <FaIdCard />
                 </div>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="ID Card Number"
                   value={idCard}
                   onChange={(e) => setIdCard(e.target.value)}
-                  required 
+                  required
                   disabled={loading}
                 />
               </div>
-              
-              <button 
-                type="submit" 
-                className="login-button" 
+
+              <button
+                type="submit"
+                className="login-button"
                 disabled={loading}
               >
                 {loading ? 'Submitting...' : 'Register as Publisher'}
               </button>
             </form>
           )}
-          
+
           <Link to="/login" className="back-to-login">
             <FaArrowLeft /> Back to Login
           </Link>
