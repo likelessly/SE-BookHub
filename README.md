@@ -97,27 +97,27 @@ Frontend (React) และ Backend (Django REST Framework) สื่อสาร
 
 ### **Backend**
 1. Clone repository:
-   - git clone https://github.com/likelessly/SE-BookHub.git
-   - cd se-bookhub/backend
-   - python -m venv venv
-   - venv\Scripts\activate
+   - ```git clone https://github.com/likelessly/SE-BookHub.git```
+   - ```cd se-bookhub/backend```
+   - ```python -m venv venv```
+   - ```venv\Scripts\activate```
    
 3. Install Requirements:
-   - pip install -r requirements.txt
+   - ```pip install -r requirements.txt```
    
 4. Set up .env file
    
 5. Runations:
-   - python manage.py migrate
+   - ```python manage.py migrate```
    
 6. Start thelopment server:
-   - python manage.py runserver
+   - ```python manage.py runserver```
    
 ### **Frontend**
 1. Navigate to the frontend directory:
-   - cd ../frontend:
-   - npm install
-   - npm run dev
+   - ```cd ../frontend:```
+   - ```npm install```
+   - ```npm run dev```
    
 #### **Backend**
 - Deploy on Render
