@@ -2,6 +2,53 @@
 
 SE-BookHub เป็นระบบจัดการหนังสือออนไลน์ที่พัฒนาด้วย Django (Backend) และ React (Frontend) โดยมีการเชื่อมต่อกับฐานข้อมูล PostgreSQL และใช้ Supabase สำหรับการจัดเก็บไฟล์
 
+โปรเจกต์นี้ใช้ Client-Server Architecture เป็นหลัก เนื่องจากมีการแยกส่วนระหว่าง Frontend (React) และ Backend (Django REST Framework) ซึ่งสื่อสารกันผ่าน API โดยมีลักษณะดังนี้:
+
+1. Client-Server Architecture
+Frontend (Client):
+พัฒนาโดยใช้ React ซึ่งทำหน้าที่เป็น client-side application
+ส่งคำขอ (HTTP requests) ไปยัง Backend ผ่าน REST API
+แสดงผลข้อมูลที่ได้รับจาก Backend ให้กับผู้ใช้
+
+Backend (Server):
+พัฒนาโดยใช้ Django REST Framework ซึ่งทำหน้าที่เป็น server-side application
+จัดการคำขอจาก Frontend เช่น การยืมหนังสือ, การคืนหนังสือ, และการจัดการบัญชีผู้ใช้
+เชื่อมต่อกับฐานข้อมูล (PostgreSQL) เพื่อจัดการข้อมูล
+ตัวอย่างการทำงาน:
+
+Frontend:
+Component AccountStats ส่งคำขอไปยัง API /api/account/stats/ เพื่อดึงข้อมูลสถิติของผู้ใช้
+แสดงข้อมูล เช่น จำนวนหนังสือที่ยืม หรือจำนวนหนังสือที่เผยแพร่
+
+Backend:
+View AccountStatsView ใน Django REST Framework รับคำขอจาก Frontend
+ดึงข้อมูลจากฐานข้อมูลและส่งกลับในรูปแบบ JSON
+
+2. MVC (Model-View-Controller)
+คำอธิบาย:
+ในส่วนของ Backend (Django REST Framework) ใช้ MVC Pattern (หรือที่เรียกว่า MVT ใน Django):
+
+Model:
+จัดการข้อมูลในฐานข้อมูล เช่น Book, BookBorrow, User
+View:
+จัดการคำขอ HTTP และส่งข้อมูลไปยัง Frontend เช่น BorrowBookView, ReturnBookView
+Controller (Serializer):
+แปลงข้อมูลระหว่าง Model และ JSON เช่น BookSerializer, UserSerializer
+ตัวอย่างการทำงาน:
+
+Model:
+BookBorrow เก็บข้อมูลการยืมหนังสือ เช่น วันที่ยืม (borrow_date) และวันที่คืน (returned_at)
+View:
+ReturnBookView รับคำขอ POST เพื่อคืนหนังสือ และอัปเดตสถานะในฐานข้อมูล
+Serializer:
+BookBorrowSerializer แปลงข้อมูลการยืมหนังสือเป็น JSON เพื่อส่งกลับไปยัง Frontend
+
+Client-Server:
+Frontend (React) และ Backend (Django REST Framework) สื่อสารกันผ่าน REST API
+MVC:
+ใช้ใน Backend เพื่อจัดการข้อมูลและคำขออย่างมีโครงสร้าง
+หากต้องการคำอธิบายเพิ่มเติมในส่วนใด แจ้งมาได้เลยครับ! :blush:
+
 ---
 
 ## **System Architecture**
@@ -10,89 +57,6 @@ SE-BookHub เป็นระบบจัดการหนังสือออ
 - **Backend**: พัฒนาโดยใช้ Django และ Django REST Framework พร้อมการ deploy บน Render
 - **Database**: ใช้ PostgreSQL บน Supabase
 - **Storage**: ใช้ Supabase Storage สำหรับจัดเก็บไฟล์ เช่น รูปภาพและ PDF
-
-BookHub/
-│── backend/    
-│   ├── admin_dashboard/    
-│   │   └── templates/admin_dashboard    
-│   ├── bookhub/ 
-│   │   │   └── settings.py    
-│   ├── books/  
-│   │   └── views.py   
-│   │   └── storages.py   
-│   ├── users/
-│   ├── venv/                  
-│   ├── manage.py        
-│   ├── requirements.txt 
-│   ├── .env             
-│   ├── Dockerfile      
-│   ├── .gitignore   
-│   └── Procfile          
-│
-│── frontend/            
-│   ├── src/             
-│   │   ├── pages/       
-│   │   │   ├── Account.css
-│   │   │   ├── AccountPublisher.jsx 
-│   │   │   ├── AccountReader.jsx 
-│   │   │   ├── Auth.css
-│   │   │   ├── BooksDetails.jsx
-│   │   │   ├── Home.jsx 
-│   │   │   ├── Home.css
-│   │   │   ├── Login.jsx
-│   │   │   ├── MainPage.jsx 
-│   │   │   ├── MainPage.css
-│   │   │   ├── ReadBookWaarpper.jsx
-│   │   │   ├── ReadBook.jsx 
-│   │   │   ├── SignupPublisher.jsx
-│   │   │   └── SignupReader.jsx 
-│   │   ├── api.js 
-│   │   ├── App.css      
-│   │   ├── App.jsx      
-│   │   ├── main.jsx     
-│   │   ├── index.css    
-│   ├── public/
-│   ├── dist/
-│   ├── node_modules/
-│   ├── .gitignore
-│   ├── Dockerfile
-│   ├── eslint.config.js       
-│   ├── index.html   
-│   ├── package-lock.json     
-│   ├── package.json            
-│   ├── vite.config.js   
-│   └── yarn.lock
-│── README.md     
-│── docker-compose.yml       
-│── requirements.txt 
-└── .gitignore           
-
-#if frontend have a problem
-npm install 
-npm run dev
-
----
-
-## **Backend**
-
-### **Tech Stack**
-- **Framework**: Django + Django REST Framework
-- **Authentication**: Token-based Authentication
-- **CORS**: รองรับการเชื่อมต่อกับ Frontend ผ่าน `django-cors-headers`
-- **Static Files**: ใช้ Whitenoise สำหรับ static files ใน production
-- **Deployment**: Render
-
-### **Features**
-- RESTful API สำหรับการจัดการผู้ใช้, หนังสือ, และแท็ก
-- ระบบรีเซ็ตรหัสผ่านผ่านอีเมล
-- ระบบจัดการไฟล์ (เช่น รูปภาพปกหนังสือ) บน Supabase Storage
-- ระบบจัดการผู้ใช้ (Reader/Publisher/Admin)
-- ระบบจัดการแท็กในหน้า Admin Dashboard
-
-### **Design Patterns**
-- **MVC (Model-View-Controller)**: Django ใช้ pattern นี้ในการจัดการโครงสร้างโค้ด
-- **Serializer Pattern**: ใช้ Django REST Framework Serializers สำหรับการแปลงข้อมูลระหว่าง Model และ API
-- **Service Layer**: แยก logic ที่ซับซ้อนออกจาก Views เพื่อให้ง่ายต่อการทดสอบและบำรุงรักษา
 
 ---
 
@@ -114,10 +78,23 @@ npm run dev
 - ระบบจัดการบัญชีผู้ใช้
 - ระบบค้นหาและแสดงรายละเอียดหนังสือ
 
-### **Design Patterns**
-- **Component-Based Architecture**: React ใช้ component-based design เพื่อแยกส่วน UI ออกเป็นชิ้นส่วนที่นำกลับมาใช้ใหม่ได้
-- **Custom Hooks**: ใช้ hooks สำหรับการจัดการ state และ logic ที่ซับซ้อน
-- **Atomic Design**: แบ่ง component ออกเป็น Atoms, Molecules, และ Organisms
+---
+
+## **Backend**
+
+### **Tech Stack**
+- **Framework**: Django + Django REST Framework
+- **Authentication**: Token-based Authentication
+- **CORS**: รองรับการเชื่อมต่อกับ Frontend ผ่าน `django-cors-headers`
+- **Static Files**: ใช้ Whitenoise สำหรับ static files ใน production
+- **Deployment**: Render
+
+### **Features**
+- RESTful API สำหรับการจัดการผู้ใช้, หนังสือ, และแท็ก
+- ระบบรีเซ็ตรหัสผ่านผ่านอีเมล
+- ระบบจัดการไฟล์ (เช่น รูปภาพปกหนังสือ) บน Supabase Storage
+- ระบบจัดการผู้ใช้ (Reader/Publisher/Admin)
+- ระบบจัดการแท็กในหน้า Admin Dashboard
 
 ---
 
@@ -140,7 +117,7 @@ npm run dev
 
 ### **Backend**
 1. Clone repository:
-      git clone https://github.com/your-repo/se-bookhub.git
+      git clone https://github.com/likelessly/SE-BookHub.git
    cd se-bookhub/backend
    reate a virtual environment:
       python -m venv venv
