@@ -790,9 +790,31 @@ header {
 
   .header-content {
     padding: 0 1rem;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row; /* Changed from column to row */
+    align-items: center; /* Keep items centered vertically */
+    justify-content: space-between; /* Space between left and right sections */
     gap: 1rem;
+    width: 100%;
+  }
+
+  .header-right {
+    margin-left: auto; /* Push to the right */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  header {
+    left: 0;
+    width: 100%;
+    padding-left: 70px; /* Make room for mobile toggle */
+    padding-right: 20px; /* Add some padding on the right */
+    z-index: 990; /* Make sure header is below sidebar but above content */
+  }
+
+  .menu-toggle {
+    position: absolute; /* Position the toggle button */
+    left: 15px; /* Align with left side of header */
   }
 
   .section-header {
@@ -966,6 +988,33 @@ header {
   .btn {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
+  }
+
+  .user-info span {
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  header {
+    height: var(--header-height);
+    min-height: 60px;
+  }
+
+  .header-content {
+    padding: 0 0.5rem 0 4rem; /* Add left padding to make room for the menu button */
+  }
+}
+
+@media (max-width: 380px) {
+  .user-info span {
+    display: none;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
   }
 }
 
