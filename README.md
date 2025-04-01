@@ -115,40 +115,30 @@ MVC:
 
 ### **Backend**
 1. Clone repository:
-      git clone https://github.com/likelessly/SE-BookHub.git
-   cd se-bookhub/backend
-   reate a virtual environment:
-      python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   - git clone https://github.com/likelessly/SE-BookHub.git
+   - cd se-bookhub/backend
+   - python -m venv venv
+   - venv\Scripts\activate
    
-3. ll dellies:
-    ll -r requirements.txt
+3. Install Requirements:
+   - pip -r requirements.txt
    
-4. Set up .env file:
-      DEBU   SECRET_   -secret-key
-   DATABASE_NAME=your-db-name
-   DATABASE_USER=your-db-user
-   DATABASE_PASSWORD=your-db-password
-   DATABASE_HOST=your-db-host
-   DATABASE_PORT=5432
+4. Set up .env file
    
 5. Runations:
-      python manage.py migrate
+   - python manage.py migrate
    
 6. Start thelopment server:
-      python manage.py runserver
+   - python manage.py runserver
    
 ### **Frontend**
 1. Navigate to the frontend directory:
-      cd ../frontend
-   2. Install dependencies:
-      npm install
-   3. Start the development s
-   npm run dev
+   - cd ../frontend:
+   - npm install
+   - npm run dev
    
 #### **Backend**
 - Deploy on Render
-- Use gunicorn as the WSGI server
 - Configure environment variables in Render's dashboard
 
 #### **Frontend**
