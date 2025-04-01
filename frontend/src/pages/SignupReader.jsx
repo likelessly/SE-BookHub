@@ -76,7 +76,7 @@ const SignupReader = () => {
     setError(null);
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/signup/reader/resend-code/', { email });
+      await axios.post('http://127.0.0.1:8000/api/signup/reader/verify/', { email });
       setMessage('A new verification code has been sent to your email.');
     } catch (err) {
       setError('Failed to resend verification code. Please try again.');
@@ -253,19 +253,6 @@ const SignupReader = () => {
                   />
                 </div>
 
-                <div className="verification-help">
-                  <p>
-                    Didn't receive the code?{' '}
-                    <button
-                      type="button"
-                      className="resend-button"
-                      onClick={resendVerificationCode}
-                      disabled={loading}
-                    >
-                      Resend
-                    </button>
-                  </p>
-                </div>
               </div>
 
               <button
