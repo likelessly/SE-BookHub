@@ -6,7 +6,7 @@ export const useBookActions = (fetchAccountData, showNotification) => {
   const [returningBookId, setReturningBookId] = useState(null);
   const token = localStorage.getItem('token');
 
-  const handleReturn = useCallback(async (borrowId, bookTitle) => {
+  const handleReturn = useCallback(async (borrowId, bookTitle, isAutoReturn = false) => {
     if (returnLoading) return;
     setReturnLoading(true);
     setReturningBookId(borrowId);
@@ -26,7 +26,12 @@ export const useBookActions = (fetchAccountData, showNotification) => {
       // เรียก fetchAccountData เพื่ออัพเดทข้อมูล
       await fetchAccountData();
       
-      showNotification('success', `You have successfully returned "${bookTitle}"`);
+      // Different message for auto-returns vs manual returns
+      if (isAutoReturn) {
+        showNotification('info', `Overdue book "${bookTitle}" has been automatically returned`);
+      } else {
+        showNotification('success', `You have successfully returned "${bookTitle}"`);
+      }
     } catch (error) {
       console.error('Return error:', error); // เพิ่ม log เพื่อตรวจสอบ error
       showNotification('error', 'Unable to return the book. Please try again later.');
