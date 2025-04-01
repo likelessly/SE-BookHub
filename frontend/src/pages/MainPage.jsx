@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaTimes } from 'react-icons/fa'; // Make sure to install react-icons
 import './MainPage.css';
+
+const getAuthData = () => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+  return { token, role };
+};
+
+const clearAuthData = () => {
+  localStorage.clear();
+  sessionStorage.clear();
+};
 
 const MainPage = () => {
   const [books, setBooks] = useState([]);
@@ -11,70 +22,62 @@ const MainPage = () => {
   const [selectedTags, setSelectedTags] = useState([]);
   const [tags, setTags] = useState([]);
   const [user, setUser] = useState(null);
-  // eslint-disable-next-line no-unused-vars
-  const [isTagOpen, setIsTagOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBy, setFilterBy] = useState('all');
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const { token, role } = getAuthData();
+    
     if (!token) {
-      setError('Unauthorized. Please login.');
-      setLoading(false);
+      navigate('/login');
       return;
     }
 
-    // Debug helper
-    const logResponse = (name, response) => {
-      console.log(`${name} API response:`, response.data);
-      return response;
-    };
-
-    // ดึงข้อมูลหนังสือทั้งหมด
-    axios.get('http://127.0.0.1:8000/api/books/', {
-      headers: { Authorization: `Token ${token}` },
-    })
-      .then(response => logResponse('Books', response))
-      .then(response => setBooks(response.data))
-      .catch(err => {
-        console.error("Error fetching books:", err);
-        setError('Failed to load books. Please try again later.');
+    // Fetch data using token
+    Promise.all([
+      axios.get('http://127.0.0.1:8000/api/books/', {
+        headers: { Authorization: `Token ${token}` }
+      }),
+      axios.get('http://127.0.0.1:8000/api/tags/', {
+        headers: { Authorization: `Token ${token}` }
       })
-      .finally(() => setLoading(false));
-
-    // ดึงข้อมูลแท็กทั้งหมดจาก Database
-    axios.get('http://127.0.0.1:8000/api/tags/', {
-      headers: { Authorization: `Token ${token}` },
+    ])
+    .then(([booksResponse, tagsResponse]) => {
+      setBooks(booksResponse.data);
+      setTags(tagsResponse.data);
     })
-      .then(response => logResponse('Tags', response))
-      .then(response => setTags(response.data))
-      .catch(err => console.error("Error fetching tags:", err));
-
-    // ดึงข้อมูลผู้ใช้
-    axios.get('http://127.0.0.1:8000/api/account/reader/', {
-      headers: { Authorization: `Token ${token}` },
+    .catch(err => {
+      if (err.response?.status === 401) {
+        clearAuthData();
+        navigate('/login');
+      }
+      setError('Failed to load data');
     })
-      .then(response => logResponse('User', response))
+    .finally(() => setLoading(false));
+
+    // ตรวจสอบ role ก่อนเรียก API
+    if (role) {
+      const userEndpoint = role === 'publisher' 
+        ? 'http://127.0.0.1:8000/api/account/publisher/'
+        : 'http://127.0.0.1:8000/api/account/reader/';
+
+      axios.get(userEndpoint, {
+        headers: { Authorization: `Token ${token}` }
+      })
       .then(response => {
-        // Fix: Store just the user object from the response
-        // The API returns { user: {...}, borrowed_books: [...] }
         setUser(response.data.user);
       })
       .catch(err => {
         console.error("Error fetching user info:", err);
-        // Try alternative user info endpoint
-        const role = localStorage.getItem('role');
-        if (role === 'publisher') {
-          axios.get('http://127.0.0.1:8000/api/account/publisher/', {
-            headers: { Authorization: `Token ${token}` },
-          })
-            .then(response => logResponse('Publisher', response))
-            .then(response => setUser(response.data.user))
-            .catch(err => console.error("Error fetching publisher info:", err));
+        if (err.response?.status === 401) {
+          clearAuthData();
+          navigate('/login');
         }
       });
-  }, []);
+    }
+  }, [navigate]);
 
   // ฟังก์ชันกรองหนังสือตาม search query และ selected tags
   const filteredBooks = books.filter(book => {
@@ -127,20 +130,16 @@ const MainPage = () => {
           </div>
           <div className="tags-container">
             {tags.map(tag => (
-              <div key={tag.id} className="tag-option">
-                <label className="tag-checkbox">
-                  <input
-                    type="checkbox"
-                    value={tag.name}
-                    checked={selectedTags.includes(tag.name)}
-                    onChange={() => handleTagSelect(tag.name)}
-                  />
-                  <span className="tag-name">{tag.name}</span>
-                  <span className="tag-count">
-                    {books.filter(book => book.tags?.includes(tag.name)).length}
-                  </span>
-                </label>
-              </div>
+              <button
+                key={tag.id}
+                className={`tag-button ${selectedTags.includes(tag.name) ? 'selected' : ''}`}
+                onClick={() => handleTagSelect(tag.name)}
+              >
+                <span className="tag-name">{tag.name}</span>
+                <span className="tag-count">
+                  {books.filter(book => book.tags?.includes(tag.name)).length}
+                </span>
+              </button>
             ))}
           </div>
         </div>
