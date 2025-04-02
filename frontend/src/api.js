@@ -70,24 +70,20 @@ export const uploadPDF = async (file) => {
     }
 
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}-${Date.now()}.${fileExt}`;
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`; // สร้างชื่อไฟล์ที่ไม่ซ้ำกัน
 
-    // อัปโหลดไฟล์
+    // อัปโหลดไฟล์ไปยัง Supabase
     // eslint-disable-next-line no-unused-vars
     const { data, error } = await supabase.storage
       .from('Bookhub_pdf')
-      .upload(`pdf/${fileName}`, file);
+      .upload(`pdfs/${fileName}`, file);
 
     if (error) {
       throw error;
     }
 
-    // สร้าง public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('Bookhub_pdf')
-      .getPublicUrl(`pdf/${fileName}`);
-
-    return publicUrl;
+    // ส่งคืนชื่อไฟล์แทน URL
+    return fileName;
   } catch (error) {
     console.error('Error uploading PDF:', error.message);
     throw error;
