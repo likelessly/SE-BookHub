@@ -61,7 +61,7 @@ const BookDetail = () => {
     axios
       .post(
         `http://127.0.0.1:8000/api/books/borrow/`,
-        { book_id: book.id },
+        { book_id: book.id, userId},
         { headers: { Authorization: `Token ${token}` } }
       )
       .then((response) => {
@@ -71,7 +71,7 @@ const BookDetail = () => {
           remaining_borrows: book.remaining_borrows - 1
         });
         setTimeout(() => {
-          navigate(`/account/reader/${response.data.user_id}`);
+          navigate(`/account/reader/${userId}`);
         }, 1500);
       })
       .catch((err) => {
